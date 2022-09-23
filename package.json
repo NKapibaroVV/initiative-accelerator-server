@@ -8,9 +8,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && ts-node ./src/index.ts",
-    "start_nodemon": "nodemon --watch public/app/src --ext js,ts,tsx,css,jsx --exec \"npm run build && ts-node ./src/index.ts\"",
-    "build": "cd ./public/app && npm i && npm run build --output public/app/build"
+    "start": "ts-node ./src/index.ts",
+    "start_nodemon": "nodemon --watch public/app/src --ext js,ts,tsx,css,jsx --exec \"npm run build && ts-node ./src/index.ts\""
   },
   "keywords": [],
   "author": "",

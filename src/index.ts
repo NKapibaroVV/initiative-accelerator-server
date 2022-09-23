@@ -12,7 +12,6 @@ let proxy = require('express-http-proxy')
 var bodyParser = require('body-parser');
 expressApp.use(bodyParser.urlencoded({ extended: false }));
 expressApp.use(bodyParser.json())
-const port = 3000
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require("nodemailer");
@@ -247,6 +246,6 @@ expressApp.post('/api/add_initiative', (req: any, res: any) => {
   })
 })
 
-server.listen(port, () => {
-  console.log(`listening on *:${port}`);
+server.listen(process.env.PORT || 5000, () => {
+  console.log(`listening on *:${process.env.PORT}`);
 });

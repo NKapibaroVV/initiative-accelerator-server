@@ -8,8 +8,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx ts-node ./src/index.ts",
-    "start_nodemon": "nodemon --watch public/app/src --ext js,ts,tsx,css,jsx --exec \"npm run build && ts-node ./src/index.ts\""
+    "start": "npm run build && node build/index.js",
+    "build":"tsc --outDir build"
   },
   "keywords": [],
   "author": "",

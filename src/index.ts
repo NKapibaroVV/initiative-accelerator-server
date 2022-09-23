@@ -29,44 +29,6 @@ const pool = mysql.createPool({
   multipleStatements: true
 });
 
-expressApp.use(express.static(path.join(__dirname, '../public/app/build')));
-
-
-expressApp.get('/', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-
-expressApp.get('/cab', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-
-expressApp.get('/vkauth', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-
-expressApp.get('/addInitiative', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-
-expressApp.get('/login', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-expressApp.get('/viewInitiatives', (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-expressApp.get(/\/images\/.*/, (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/public/images/', req.path.replace("/images/", "")));
-});
-expressApp.get(/\/check_i\/.*/, (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-expressApp.get("/rating", (req: any, res: any) => {
-  res.sendFile(path.join(__dirname, '../public/app/build', 'index.html'));
-});
-
-
-
-
 expressApp.post("/api/complete_initiative", (req: any, res: any) => {
   const { token, message, initiative_id } = req.body;
   pool.query(`SELECT \`id\` FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {

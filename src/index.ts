@@ -19,7 +19,12 @@ const nodemailer = require("nodemailer");
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
-expressApp.use(cors())
+var corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+expressApp.use(cors(corsOptions))
 
 const pool = mysql.createPool({
   connectionLimit: 80,

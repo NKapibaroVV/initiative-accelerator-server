@@ -1,0 +1,43 @@
+{
+  "name": "initiative_accelerator",
+  "version": "1.0.0",
+  "description": "",
+  "engines": {
+    "node": "16.15.1"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build && ts-node ./src/index.ts",
+    "start_nodemon": "nodemon --watch public/app/src --ext js,ts,tsx,css,jsx --exec \"npm run build && ts-node ./src/index.ts\"",
+    "build": "cd ./public/app && npm i && npm run build --output public/app/build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.7.18",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "@types/crypto-js": "^4.1.1",
+    "@types/express": "^4.17.14",
+    "@types/socket.io": "^3.0.2",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "express": "^4.18.1",
+    "express-http-proxy": "^1.6.3",
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.8",
+    "nodemon": "^2.0.19",
+    "querystring": "^0.2.1",
+    "react-cookie": "^4.1.1",
+    "react-router-dom": "^6.4.0",
+    "react-scripts": "^5.0.1",
+    "request": "^2.88.2",
+    "socket.io": "^4.5.2",
+    "uuid": "^9.0.0"
+  }
+}

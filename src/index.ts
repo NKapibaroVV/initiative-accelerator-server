@@ -18,7 +18,7 @@ const nodemailer = require("nodemailer");
 
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
-
+expressApp.use(cors())
 const pool = mysql.createPool({
   connectionLimit: 80,
   host: '141.8.195.33',

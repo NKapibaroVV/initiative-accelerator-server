@@ -20,7 +20,7 @@ var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
 var corsOptions = {
-  origin: '*',
+  origin: ["front-initiative-accelerator.herokuapp.com","www.front-initiative-accelerator.herokuapp.com","localhost","localhost:3000","vk.com"],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 

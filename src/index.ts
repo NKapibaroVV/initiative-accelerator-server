@@ -145,7 +145,7 @@ expressApp.post(`/api/get_initiative_results`, (req: any, res: any) => {
     } else {
       let role: string = result[0].role;
       if (role == "Администратор" || role == "Модератор") {
-        pool.query(`SELECT * FROM \`initiatives_results\` WHERE \`initiative_id\`=${mysql.escape(id)}`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM \`initiatives_results\` FULL JOIN \`users\` ON \`initiatives_results\`.\`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`=${mysql.escape(id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -180,8 +180,10 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
       pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
+        }else{
+          res.send(result[0])
         }
-        res.send(result[0])
+        
       })
     } else {
       pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(login)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
@@ -273,5 +275,5 @@ expressApp.post('/api/add_initiative', (req: any, res: any) => {
 })
 
 server.listen(process.env.PORT || 5000, () => {
-  console.log(`listening on *:${process.env.PORT}`);
+  console.log(`listening on *:${process.env.PORT || 5000}`);
 });

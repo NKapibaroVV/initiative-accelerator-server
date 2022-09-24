@@ -227,7 +227,7 @@ expressApp.post("/api/get_user_initiatives", (req: any, res: any) => {
     if (err) {
       res.send(err.message)
     }
-    pool.query(`SELECT * FROM \`initiatives_${result[0]["login"]}\` JOIN \`initiatives_${result[0]["login"]}\` ON \`initiatives_${result[0]["login"]}\`.id=\`initiatives\`.id`, function (err: any, result: any) {
+    pool.query(`SELECT * FROM \`initiatives_${result[0]["login"]}\` JOIN \`initiatives\` ON \`initiatives_${result[0]["login"]}\`.id=\`initiatives\`.id`, function (err: any, result: any) {
       if (err) {
         res.send(err.message)
       }

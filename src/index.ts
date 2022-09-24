@@ -145,7 +145,7 @@ expressApp.post(`/api/get_initiative_results`, (req: any, res: any) => {
     } else {
       let role: string = result[0].role;
       if (role == "Администратор" || role == "Модератор") {
-        pool.query(`SELECT * FROM \`initiatives_results\` FULL JOIN \`users\` ON \`initiatives_results\`.\`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`=${mysql.escape(id)}`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM \`initiatives_results\` INNER JOIN \`users\` ON \`initiatives_results\`.\`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`=${mysql.escape(id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -227,7 +227,7 @@ expressApp.post("/api/get_user_initiatives", (req: any, res: any) => {
     if (err) {
       res.send(err.message)
     }
-    pool.query(`SELECT * FROM \`initiatives_${result[0]["login"]}\` JOIN \`initiatives\` ON \`initiatives_${result[0]["login"]}\`.id=\`initiatives\`.id`, function (err: any, result: any) {
+    pool.query(`SELECT * FROM \`initiatives_${result[0]["login"]}\` JOIN \`initiatives_${result[0]["login"]}\` ON \`initiatives_${result[0]["login"]}\`.id=\`initiatives\`.id`, function (err: any, result: any) {
       if (err) {
         res.send(err.message)
       }

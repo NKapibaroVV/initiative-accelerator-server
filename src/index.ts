@@ -26,7 +26,7 @@ var corsOptions = {
 
 expressApp.use(cors(corsOptions))
 // Add headers before the routes are defined
-expressApp.use(function (req:any, res:any, next:any) {
+expressApp.use(function (req: any, res: any, next: any) {
 
   // Website you wish to allow to connect
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -163,37 +163,28 @@ expressApp.get("/api/get_global_rating", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let scores = result;
-      pool.query(`SELECT \`name\`, \`surname\`, \`score\` FROM \`users\` WHERE \`score\`>${scores[scores.length-1].score-1} ORDER BY \`score\` DESC`, function (err: any, result: any) {
+      pool.query(`SELECT \`name\`, \`surname\`, \`score\` FROM \`users\` WHERE \`score\`>${scores[scores.length - 1].score - 1} ORDER BY \`score\` DESC`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
           res.send(result);
-        }})
+        }
+      })
     }
   })
 })
 
 expressApp.post('/api/get_me', (req: any, res: any) => {
   try {
-    const { login, password, token } = req.body;
-    if (token) {
-      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-        if (err) {
-          res.send(err.message)
-        }else{
-          res.send(result[0])
-        }
-        
-      })
-    } else {
-      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(login)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
-        if (err) {
-          res.send(err.message)
-        }
-
+    const { token } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+      if (err) {
+        res.send(err.message)
+      } else {
         res.send(result[0])
-      })
-    }
+      }
+
+    })
   }
   catch (e: any) {
     res.send(e.message);

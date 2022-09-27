@@ -45,7 +45,6 @@ expressApp.use(function (req: any, res: any, next: any) {
   next();
 });
 
-
 const pool = mysql.createPool({
   connectionLimit: 80,
   host: '141.8.195.33',
@@ -86,7 +85,7 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
 expressApp.post('/api/reg', (req: any, res: any) => {
   const { first_name, second_name, email, login } = req.body;
   pool.query(`INSERT INTO \`users\` (\`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, '','${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
-      pool.query(`CREATE TABLE \`initiatives_${login}\` (
+    pool.query(`CREATE TABLE \`initiatives_${login}\` (
       \`id\` varchar(300) COLLATE utf8_unicode_ci NOT NULL,
       \`state\` varchar(100) COLLATE utf8_unicode_ci NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;`, function (err: any, result: any) {
@@ -98,7 +97,6 @@ expressApp.post('/api/reg', (req: any, res: any) => {
         }
       });
     })
-    
   });
 });
 

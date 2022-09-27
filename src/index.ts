@@ -84,19 +84,19 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
 
 expressApp.post('/api/reg', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
-  let id=uuidv4();
-  pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(password)},'${id}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
+  let login = `${email.split("@")[0]}_${uuidv4()}`
+  pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(password)},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {
-      pool.query(`CREATE TABLE \`initiatives_${id}\` (
+      pool.query(`CREATE TABLE \`initiatives_${login}\` (
         \`id\` varchar(300) COLLATE utf8_unicode_ci NOT NULL,
         \`state\` varchar(100) COLLATE utf8_unicode_ci NOT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;`, function (err: any, result: any) {
         if (err) {
           res.send(err)
         } else {
-          pool.query(`SELECT \`name\`,\`surname\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
+          pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
             if (err) {
               res.send(err)
             } else {

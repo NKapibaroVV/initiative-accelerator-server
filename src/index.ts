@@ -89,7 +89,7 @@ expressApp.post('/api/reg', (req: any, res: any) => {
       \`id\` varchar(300) COLLATE utf8_unicode_ci NOT NULL,
       \`state\` varchar(100) COLLATE utf8_unicode_ci NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;`, function (err: any, result: any) {
-      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`='' AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
+      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`='' AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
         if (err) {
           res.send(err)
         } else {

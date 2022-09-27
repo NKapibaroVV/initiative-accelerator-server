@@ -89,7 +89,7 @@ expressApp.post('/api/reg', (req: any, res: any) => {
     if (err) {
       let registered = false;
       let errorText="member already exists"
-      res.send(JSON.stringify(registered, errorText))
+      res.send(JSON.stringify({registered, errorText}))
     } else {
       pool.query(`CREATE TABLE \`initiatives_${login}\` (
         \`id\` varchar(300) COLLATE utf8_unicode_ci NOT NULL,

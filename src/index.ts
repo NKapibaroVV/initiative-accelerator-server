@@ -89,10 +89,10 @@ expressApp.post('/api/auth', (req: any, res: any) => {
     if (err) {
       res.send(err)
     } else {
-
+      res.send(result)
     }
   })
-  })
+})
 expressApp.post('/api/reg', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`

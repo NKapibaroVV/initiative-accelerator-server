@@ -85,7 +85,7 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
 expressApp.post('/api/auth', (req: any, res: any) => {
   const { email, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {

@@ -107,6 +107,9 @@ expressApp.post('/api/reg', (req: any, res: any) => {
         if (err) {
           res.send(err)
         } else {
+          pool.query(`ALTER TABLE \`initiatives_${login}\`
+          ADD PRIMARY KEY (\`id\`);
+        COMMIT;`)
           pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
             if (err) {
               res.send(err)

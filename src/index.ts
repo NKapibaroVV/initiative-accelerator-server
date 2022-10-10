@@ -250,6 +250,29 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role=="Администратор"||user.role=="Модератор") {
+        pool.query(`SELECT * FROM \`initiatives_completed\` WHERE \`checked\`=0`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      }else{
+        res.send()
+      }
+    }
+  })
+})
+
 expressApp.post("/api/get_personal_rating", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SET @rank=0;SET @userScore = (SELECT \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}); SELECT \`position\`,\`score\` FROM ( SELECT @rank:=@rank+1 AS \`position\`, \`token\`, \`score\` FROM ( SELECT \`score\`, \`token\` FROM \`users\` ORDER BY \`score\` DESC ) as t1 ) as t2  WHERE \`score\` = @userScore ORDER BY \`position\` ASC LIMIT 1;`, function (err: any, result: any) {

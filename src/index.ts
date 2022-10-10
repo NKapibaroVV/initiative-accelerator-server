@@ -54,34 +54,6 @@ const pool = mysql.createPool({
   multipleStatements: true
 });
 
-expressApp.post("/api/complete_initiative", (req: any, res: any) => {
-  const { token, message, initiative_id } = req.body;
-  pool.query(`SELECT \`id\` FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
-    if (err) {
-      res.send(err)
-    } else {
-      let initiativeId = result[0].id;
-      pool.query(`SELECT \`id\`,\`login\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-        if (err) {
-          res.send(err)
-        } else {
-          let userId = result[0].id;
-          let userLogin = result[0].login;
-          pool.query(`INSERT INTO \`initiatives_results\` (\`initiative_id\`, \`user_id\`, \`message\`, \`time\`) VALUES ('${initiativeId}','${userId}', ${mysql.escape(message)}, ${new Date().getTime()})`, function (err: any, result: any) {
-            if (err) {
-              res.send(err)
-            } else {
-              pool.query(`UPDATE \`initiatives_${userLogin}\` SET \`state\`='completed' WHERE \`id\`='${initiativeId}'`, function (err: any, result: any) {
-                res.send({ "success": "true" })
-              })
-            }
-          })
-        }
-      })
-    }
-  })
-})
-
 expressApp.post('/api/auth', (req: any, res: any) => {
   const { email, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
@@ -100,25 +72,13 @@ expressApp.post('/api/reg', (req: any, res: any) => {
     if (err) {
       res.send(err)
     } else {
-      pool.query(`CREATE TABLE \`initiatives_${login}\` (
-        \`id\` varchar(300) COLLATE utf8_unicode_ci NOT NULL,
-        \`state\` varchar(100) COLLATE utf8_unicode_ci NOT NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;`, function (err: any, result: any) {
+      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
         if (err) {
           res.send(err)
         } else {
-          pool.query(`ALTER TABLE \`initiatives_${login}\`
-          ADD PRIMARY KEY (\`id\`);
-        COMMIT;`)
-          pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
-            if (err) {
-              res.send(err)
-            } else {
-              res.send(result)
-            }
-          });
+          res.send(result)
         }
-      })
+      });
     }
   });
 });
@@ -160,25 +120,6 @@ expressApp.post(`/api/award_user`, (req: any, res: any) => {
 });
 
 
-expressApp.post(`/api/get_initiative_results`, (req: any, res: any) => {
-  const { token, id } = req.body;
-  pool.query(`SELECT \`role\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-    if (err) {
-      res.send(err)
-    } else {
-      let role: string = result[0].role;
-      if (role == "Администратор" || role == "Модератор") {
-        pool.query(`SELECT * FROM \`initiatives_results\` INNER JOIN \`users\` ON \`initiatives_results\`.\`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`=${mysql.escape(id)}`, function (err: any, result: any) {
-          if (err) {
-            res.send(err.message)
-          } else {
-            res.send(result)
-          }
-        });
-      }
-    }
-  })
-})
 
 expressApp.get("/api/get_global_rating", (req: any, res: any) => {
   pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 10`, function (err: any, result: any) {
@@ -214,15 +155,7 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
   }
 });
 
-expressApp.get("/api/get_all_initiatives", (req: any, res: any) => {
-  pool.query(`SELECT * FROM initiatives ORDER BY deadLine DESC`, function (err: any, result: any) {
-    if (err) {
-      res.send(err.message)
-    } else {
-      res.send(result)
-    }
-  })
-})
+
 
 expressApp.post("/api/get_personal_rating", (req: any, res: any) => {
   const { token } = req.body;
@@ -235,58 +168,6 @@ expressApp.post("/api/get_personal_rating", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/get_user_initiatives", (req: any, res: any) => {
-  const { token } = req.body;
-  pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-    if (err) {
-      res.send(err.message)
-    }
-    pool.query(`SELECT * FROM \`initiatives_${result[0]["login"]}\` JOIN \`initiatives\` ON \`initiatives_${result[0]["login"]}\`.id=\`initiatives\`.id`, function (err: any, result: any) {
-      if (err) {
-        res.send(err.message)
-      }
-      res.send(result)
-    })
-  })
-})
-
-expressApp.post("/api/start_initiative", (req: any, res: any) => {
-  const { token, id } = req.body;
-  pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-    if (err) {
-      res.send(err.message)
-    }
-    pool.query(`INSERT INTO \`initiatives_${result[0]["login"]}\` (\`id\`, \`state\`) VALUES (${mysql.escape(id)},'started')`, function (err: any, result: any) {
-      if (err) {
-        res.send(err.message)
-      }
-      res.send(result)
-    })
-  })
-});
-
-expressApp.post('/api/add_initiative', (req: any, res: any) => {
-  const { title, score, comment, deadLine, token, category } = req.body;
-  pool.query(`SELECT \`role\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-    if (err) {
-      res.send(err)
-    } else {
-      let role: string = result[0].role;
-
-      if (role == "Администратор" || role == "Модератор") {
-        pool.query(`INSERT INTO \`initiatives\` (\`category\`, \`title\`, \`deadLine\`, \`offcanvasContent\`, \`income\`, \`id\`) VALUES (${mysql.escape(category)},${mysql.escape(title)}, ${mysql.escape(deadLine)}, ${mysql.escape(comment)}, ${mysql.escape(score)}, '${uuidv4()}')`, function (err: any, result: any) {
-          if (err) {
-            res.send(err)
-          } else {
-            res.send({ "success": "true" });
-          }
-        })
-      } else {
-        res.send({ "error": "Access denied" });
-      }
-    }
-  })
-})
 
 server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);

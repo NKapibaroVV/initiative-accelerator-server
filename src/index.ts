@@ -171,7 +171,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
         if (err) {
           res.send(err.message)
         } else {
-          res.send({ result, initiatives, now, sql })
+          res.send({ result, initiatives, now,sql })
         }
       })
 

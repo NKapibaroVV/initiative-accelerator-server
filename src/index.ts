@@ -158,22 +158,21 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
 expressApp.post("/api/get_initiatives", (req: any, res: any) => {
   const { token } = req.body;
 
-  let initiatives:any[] = [];
+  let initiatives: any[] = [];
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
       let user = result[0];
-
-      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit IS NULL`, function (err: any, result: any) {
+      let now = new Date().getTime();
+      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
-          res.send({result, initiatives})
+          res.send({ result, initiatives, now })
         }
       })
-
 
     }
 

@@ -157,16 +157,21 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
 
 expressApp.post("/api/get_taken_initiatives", (req: any, res: any) => {
   const { token } = req.body;
-
-  let user = getUser(token);
-  pool.query(`SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
-      res.send(result)
+      let user = result[0];
+      let sql = `SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
+      pool.query(sql, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result)
+        }
+      })
     }
   })
-
 })
 
 expressApp.post("/api/get_completed_initiatives", (req: any, res: any) => {
@@ -233,13 +238,12 @@ server.listen(process.env.PORT || 5000, () => {
 
 
 
-function getUser(token: string): any {
+function getUser(token: string) {
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       throw new Error(err.message);
     } else {
-      let userObject = result[0];
-      return userObject
+      return result[0];
     }
   })
 }

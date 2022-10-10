@@ -166,7 +166,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit<users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit IS NULL`, function (err: any, result: any) {
+      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${new Date().getTime()} AND users_limit IS NULL`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

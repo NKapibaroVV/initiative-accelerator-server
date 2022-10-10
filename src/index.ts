@@ -193,6 +193,24 @@ expressApp.post("/api/get_completed_initiatives", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_initiatives", (req: any, res: any) => {
+  const { token } = req.body;
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let now = new Date().getTime();
+      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result)
+        }
+      })
+    }
+  })
+})
+
 expressApp.post("/api/start_initiative", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -237,24 +255,3 @@ expressApp.post("/api/get_personal_rating", (req: any, res: any) => {
 server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-function getUser(token: string) {
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
-    if (err) {
-      throw new Error(err.message);
-    } else {
-      return result[0];
-    }
-  })
-}

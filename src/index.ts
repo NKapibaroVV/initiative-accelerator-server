@@ -283,7 +283,7 @@ expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role=="Администратор"||user.role=="Модератор") {
-        pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`initiative_id\`='${initiative_id}'`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`initiative_id\`='${initiative_id}' AND \`checked\`=0`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

@@ -213,6 +213,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
 
 expressApp.post("/api/start_initiative", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
+  
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)

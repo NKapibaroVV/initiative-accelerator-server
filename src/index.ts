@@ -170,32 +170,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
         if (err) {
           res.send(err.message)
         } else {
-          let result = [
-            {
-              "id": "0",
-              "title": "Задание 1",
-              "content": "Выполните задание",
-              "deadline_take": 1665409934000,
-              "deadline_complete": 1665419934000,
-              "users_limit": null
-            },
-            {
-              "id": "1",
-              "title": "123 задание",
-              "content": "123",
-              "deadline_take": 1665409934000,
-              "deadline_complete": 1665419934000,
-              "users_limit": 1
-            },
-            {
-              "id": "2",
-              "title": "00 задание",
-              "content": "00",
-              "deadline_take": 1665409934000,
-              "deadline_complete": 1665419934000,
-              "users_limit": 2
-            }
-          ]
+          res.send(result)
         }
       })
 

@@ -26,10 +26,11 @@ var corsOptions = {
 
 expressApp.use(cors(corsOptions))
 // Add headers before the routes are defined
-expressApp.use(function (req: any, res: any, next: any) {
+// Add headers before the routes are defined
+expressApp.use(function (req:any, res:any, next:any) {
 
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
 
   // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -213,7 +214,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
 
 expressApp.post("/api/start_initiative", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
-  
+
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)

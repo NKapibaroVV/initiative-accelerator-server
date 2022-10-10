@@ -174,6 +174,25 @@ expressApp.post("/api/get_taken_initiatives", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_completed_initiatives", (req: any, res: any) => {
+  const { token } = req.body;
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      let sql = `SELECT * FROM \`initiatives_completed\` INNER JOIN \`initiatives\` on \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
+      pool.query(sql, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result)
+        }
+      })
+    }
+  })
+})
+
 expressApp.post("/api/get_initiatives", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {

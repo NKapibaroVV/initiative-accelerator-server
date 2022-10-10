@@ -25,7 +25,7 @@ var corsOptions = {
 }
 
 expressApp.use(cors(corsOptions))
-// Add headers before the routes are defined
+
 // Add headers before the routes are defined
 expressApp.use(function (req:any, res:any, next:any) {
 

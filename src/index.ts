@@ -20,7 +20,7 @@ var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
 // Add headers before the routes are defined
-expressApp.use(function (req:any, res:any, next:any) {
+expressApp.use(function (req: any, res: any, next: any) {
 
   // Website you wish to allow to connect
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -225,6 +225,25 @@ expressApp.post("/api/start_initiative", (req: any, res: any) => {
             }
           })
           res.send(result)
+        }
+      })
+    }
+  })
+})
+
+expressApp.post("/api/complete_initiative", (req: any, res: any) => {
+  const { token, initiative_id, comment } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      pool.query(`INSERT INTO \`initiatives_completed\` (\`initiative_id\`,\`user_id\`,\`comment\`,\`checked\`) VALUES ('${initiative_id}','${user.id}','${comment}',0)`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send()
         }
       })
     }

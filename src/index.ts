@@ -166,11 +166,12 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
     } else {
       let user = result[0];
       let now = new Date().getTime();
-      pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`, function (err: any, result: any) {
+      let sql = `SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`
+      pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
-          res.send({ result, initiatives, now })
+          res.send({ result, initiatives, now, sql })
         }
       })
 

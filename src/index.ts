@@ -158,7 +158,7 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
 expressApp.post("/api/get_initiatives", (req: any, res: any) => {
   const { token } = req.body;
 
-  let initiatives = [];
+  let initiatives:any[] = [];
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -170,7 +170,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
         if (err) {
           res.send(err.message)
         } else {
-          res.send(result)
+          res.send({result, initiatives})
         }
       })
 

@@ -19,13 +19,6 @@ const nodemailer = require("nodemailer");
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
-var corsOptions = {
-  origin: "*",
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-
-expressApp.use(cors(corsOptions))
-
 // Add headers before the routes are defined
 expressApp.use(function (req:any, res:any, next:any) {
 

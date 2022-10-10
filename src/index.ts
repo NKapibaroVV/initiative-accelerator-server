@@ -259,7 +259,31 @@ expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role=="Администратор"||user.role=="Модератор") {
-        pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`checked\`=0`, function (err: any, result: any) {
+        pool.query(`SELECT DISTINCT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`checked\`=0 GROUP BY \`initiative_id\``, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      }else{
+        res.send()
+      }
+    }
+  })
+})
+
+
+expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
+  const { token, initiative_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role=="Администратор"||user.role=="Модератор") {
+        pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`initiative_id\`='${initiative_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

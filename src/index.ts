@@ -86,6 +86,7 @@ expressApp.post(`/api/award_user`, (req: any, res: any) => {
       res.send(err)
     } else {
       let role: string = result[0].role;
+      
       if (role == "Администратор" || role == "Модератор") {
         pool.query(`SELECT \`income\` from \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {

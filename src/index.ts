@@ -48,7 +48,7 @@ const pool = mysql.createPool({
   multipleStatements: true
 });
 
-expressApp.post('/api/auth', (req: any, res: any) => {
+expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
@@ -59,7 +59,7 @@ expressApp.post('/api/auth', (req: any, res: any) => {
     }
   })
 })
-expressApp.post('/api/reg', (req: any, res: any) => {
+expressApp.post('/api/reg/', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
   pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(password)},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
@@ -77,7 +77,7 @@ expressApp.post('/api/reg', (req: any, res: any) => {
   });
 });
 
-expressApp.post(`/api/get_all_users`, (req: any, res: any) => {
+expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -99,7 +99,7 @@ expressApp.post(`/api/get_all_users`, (req: any, res: any) => {
   })
 });
 
-expressApp.post(`/api/award_user`, (req: any, res: any) => {
+expressApp.post(`/api/award_user/`, (req: any, res: any) => {
   const { token, initiative_id, user_id, penalty } = req.body;
   pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -136,7 +136,7 @@ expressApp.post(`/api/award_user`, (req: any, res: any) => {
 
 
 
-expressApp.get("/api/get_global_rating", (req: any, res: any) => {
+expressApp.get("/api/get_global_rating/", (req: any, res: any) => {
   pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 10`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
@@ -153,7 +153,7 @@ expressApp.get("/api/get_global_rating", (req: any, res: any) => {
   })
 })
 
-expressApp.post('/api/get_me', (req: any, res: any) => {
+expressApp.post('/api/get_me/', (req: any, res: any) => {
   try {
     const { token } = req.body;
     pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -170,7 +170,7 @@ expressApp.post('/api/get_me', (req: any, res: any) => {
   }
 });
 
-expressApp.post("/api/get_taken_initiatives", (req: any, res: any) => {
+expressApp.post("/api/get_taken_initiatives/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -189,7 +189,7 @@ expressApp.post("/api/get_taken_initiatives", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/get_completed_initiatives", (req: any, res: any) => {
+expressApp.post("/api/get_completed_initiatives/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -208,7 +208,7 @@ expressApp.post("/api/get_completed_initiatives", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/get_initiatives", (req: any, res: any) => {
+expressApp.post("/api/get_initiatives/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -226,7 +226,7 @@ expressApp.post("/api/get_initiatives", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/start_initiative", (req: any, res: any) => {
+expressApp.post("/api/start_initiative/", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -252,7 +252,7 @@ expressApp.post("/api/start_initiative", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/complete_initiative", (req: any, res: any) => {
+expressApp.post("/api/complete_initiative/", (req: any, res: any) => {
   const { token, initiative_id, comment } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -271,7 +271,7 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
+expressApp.post("/api/get_initiatives_results/", (req: any, res: any) => {
   const { token } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -295,7 +295,7 @@ expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
 })
 
 
-expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
+expressApp.post("/api/get_initiative_results/", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -318,7 +318,7 @@ expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/add_initiative", (req: any, res: any) => {
+expressApp.post("/api/add_initiative/", (req: any, res: any) => {
   const { token, title, income, take_deadline, complete_deadline, content, category, users_limit } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
@@ -341,7 +341,7 @@ expressApp.post("/api/add_initiative", (req: any, res: any) => {
   })
 })
 
-expressApp.post("/api/get_personal_rating", (req: any, res: any) => {
+expressApp.post("/api/get_personal_rating/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SET @rank=0;SET @userScore = (SELECT \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}); SELECT \`position\`,\`score\` FROM ( SELECT @rank:=@rank+1 AS \`position\`, \`token\`, \`score\` FROM ( SELECT \`score\`, \`token\` FROM \`users\` ORDER BY \`score\` DESC ) as t1 ) as t2  WHERE \`score\` = @userScore ORDER BY \`position\` ASC LIMIT 1;`, function (err: any, result: any) {
     if (err) {

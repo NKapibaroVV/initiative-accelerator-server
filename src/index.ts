@@ -96,8 +96,7 @@ expressApp.post(`/api/award_user`, (req: any, res: any) => {
               if (err) {
                 res.send(err)
               } else {
-
-                pool.query(`DELETE FROM \`initiatives_results\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)} AND \`user_id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+                pool.query(`UPDATE \`initiatives_completed\` SET checked=1 where initiative_id='${initiative_id}' AND user_id='${user_id}'`, function (err: any, result: any) {
                   if (err) {
                     res.send(err)
                   } else {
@@ -258,7 +257,7 @@ expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role=="Администратор"||user.role=="Модератор") {
+      if (user.role == "Администратор" || user.role == "Модератор") {
         pool.query(`SELECT DISTINCT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`checked\`=0 GROUP BY \`initiative_id\``, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -266,7 +265,7 @@ expressApp.post("/api/get_initiatives_results", (req: any, res: any) => {
             res.send(result)
           }
         })
-      }else{
+      } else {
         res.send()
       }
     }
@@ -282,7 +281,7 @@ expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role=="Администратор"||user.role=="Модератор") {
+      if (user.role == "Администратор" || user.role == "Модератор") {
         pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` JOIN \`users\` on \`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`='${initiative_id}' AND \`checked\`=0`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -290,7 +289,7 @@ expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
             res.send(result)
           }
         })
-      }else{
+      } else {
         res.send()
       }
     }

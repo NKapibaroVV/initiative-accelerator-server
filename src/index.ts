@@ -23,7 +23,7 @@ const urlencodedParser = express.urlencoded({ extended: false });
 expressApp.use(function (req: any, res: any, next: any) {
 
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -351,10 +351,6 @@ expressApp.post("/api/get_personal_rating/", (req: any, res: any) => {
     }
   })
 })
-
-
-
-
 
 
 server.listen(process.env.PORT || 5000, () => {

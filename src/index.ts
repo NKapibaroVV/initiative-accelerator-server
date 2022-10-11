@@ -234,7 +234,7 @@ expressApp.post("/api/start_initiative", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES ('${initiative_id}','${user.id}')`, function (err: any, result: any) {
+      pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
@@ -260,7 +260,7 @@ expressApp.post("/api/complete_initiative", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`INSERT INTO \`initiatives_completed\` (\`initiative_id\`,\`user_id\`,\`comment\`,\`checked\`) VALUES ('${initiative_id}','${user.id}','${comment}',0)`, function (err: any, result: any) {
+      pool.query(`INSERT INTO \`initiatives_completed\` (\`initiative_id\`,\`user_id\`,\`comment\`,\`checked\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)},${mysql.escape(comment)},0)`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
@@ -305,6 +305,29 @@ expressApp.post("/api/get_initiative_results", (req: any, res: any) => {
       let user = result[0];
       if (user.role == "Администратор" || user.role == "Модератор") {
         pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` JOIN \`users\` on \`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`='${initiative_id}' AND \`checked\`=0`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
+expressApp.post("/api/add_initiative", (req: any, res: any) => {
+  const { token, title, income, take_deadline, complete_deadline, content, category, users_limit } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`INSERT INTO \`initiatives\` (\`id\`, \`category\`, \`title\`, \`content\`, \`income\`, \`deadline_take\`, \`deadline_complete\`, \`users_limit\`, \`users_taken\`) VALUES ('${uuidv4()}', ${mysql.escape(category)}, ${mysql.escape(title)}, ${mysql.escape(content)}, ${mysql.escape(income)}, ${mysql.escape(take_deadline)}, ${mysql.escape(complete_deadline)}, ${!!users_limit?mysql.escape(users_limit):"NULL"}, 0)`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

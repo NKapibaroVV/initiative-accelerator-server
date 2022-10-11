@@ -81,12 +81,13 @@ expressApp.post('/api/reg', (req: any, res: any) => {
 
 expressApp.post(`/api/award_user`, (req: any, res: any) => {
   const { token, initiative_id, user_id, penalty } = req.body;
-  pool.query(`SELECT \`role\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+  pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {
-      let role: string = result[0].role;
-      
+      let user: any = result[0];
+      let role: string = user.role;
+
       if (role == "Администратор" || role == "Модератор") {
         pool.query(`SELECT \`income\` from \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {

@@ -335,7 +335,7 @@ expressApp.post("/api/add_initiative", (req: any, res: any) => {
           }
         })
       } else {
-        res.send()
+        res.send("Wrong user role")
       }
     }
   })

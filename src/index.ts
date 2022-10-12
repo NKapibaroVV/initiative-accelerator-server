@@ -20,7 +20,11 @@ var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
 // Add headers before the routes are defined
-expressApp.use(cors({ origin: 'http://localhost:3000/', credentials: true }));
+expressApp.use(function(req:any, res:any, next:any) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 const pool = mysql.createPool({
   connectionLimit: 80,

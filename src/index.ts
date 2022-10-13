@@ -26,6 +26,7 @@ expressApp.use(function(req:any, res:any, next:any) {
   next();
 });
 
+
 const pool = mysql.createPool({
   connectionLimit: 80,
   host: '141.8.195.33',

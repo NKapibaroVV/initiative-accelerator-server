@@ -409,7 +409,7 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
           let shopItem = result[0];
 
           if (user.score - shopItem.cost >= 0) {
-            if (shopItem.users_limit == null || shopItem.users_limit < shopItem.users_taken) {
+            if (shopItem.users_limit == null || shopItem.users_taken < shopItem.users_limit) {
               pool.query(`INSERT INTO \`shop_logs\` (\`identifer\`, \`shop_item_id\`,\`user_id\`,\`time\`) VALUES (NULL, ${mysql.escape(shop_item_id), user.id, new Date().getTime()})`, function (err: any, result: any) {
                 if (err) {
                   res.send(err.message)

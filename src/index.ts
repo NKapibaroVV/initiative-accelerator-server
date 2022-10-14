@@ -410,7 +410,7 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
 
           if (user.score - shopItem.cost >= 0) {
             if (shopItem.users_limit == null || shopItem.users_taken < shopItem.users_limit) {
-              pool.query(`INSERT INTO \`shop_logs\` (\`identifer\`, \`shop_item_id\`,\`user_id\`,\`time\`) VALUES (NULL, ${mysql.escape(shop_item_id), user.id, new Date().getTime()})`, function (err: any, result: any) {
+              pool.query(`INSERT INTO \`shop_logs\` (\`identifer\`, \`shop_item_id\`,\`user_id\`,\`time\`) VALUES (NULL, ${mysql.escape(shop_item_id)}, '${user.id}', ${new Date().getTime()})`, function (err: any, result: any) {
                 if (err) {
                   res.send(err.message)
                 } else {
@@ -443,7 +443,7 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`SELECT * FROM \`shop_logs\` WHERE \`user_id\`='${user.id}'`, function (err: any, result: any) {
+      pool.query(`SELECT * FROM \`shop_logs\` JOIN \`shop_items\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE  \`shop_logs\`.\`user_id\`='${user.id}'`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

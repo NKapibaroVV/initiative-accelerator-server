@@ -450,7 +450,7 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`SELECT * FROM \`shop_logs\` JOIN \`shop_items\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE  \`shop_logs\`.\`user_id\`='${user.id}' ORDER BY \`shop_logs\`.\`time\` ASC`, function (err: any, result: any) {
+      pool.query(`SELECT * FROM \`shop_logs\` JOIN \`shop_items\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE  \`shop_logs\`.\`user_id\`='${user.id}' ORDER BY \`shop_logs\`.\`time\` DESC`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

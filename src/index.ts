@@ -408,7 +408,7 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
         } else {
           let shopItem = result[0];
 
-          if (shopItem.users_limit == null || shopItem.users_limit < shopItem.users_taken&&user.score-shopItem.cost>=0) {
+          if (shopItem.users_limit == null || shopItem.users_limit < shopItem.users_taken && user.score - shopItem.cost >= 0) {
             pool.query(`INSERT INTO \`shop_logs\` (\`identifer\`, \`shop_item_id\`,\`user_id\`,\`time\`) VALUES (NULL, ${mysql.escape(shop_item_id), user.id, new Date().getTime()})`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
@@ -422,7 +422,7 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
                 })
               }
             })
-          }else{
+          } else {
             res.send("Достигнуто ограничение по количеству!")
           }
         }
@@ -430,6 +430,27 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
     }
   })
 })
+
+expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      pool.query(`SELECT * FROM \`shop_logs\` WHERE \`user_id\`='${user.id}'`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result)
+        }
+      })
+    }
+  })
+})
+
+
 
 
 server.listen(process.env.PORT || 5000, () => {

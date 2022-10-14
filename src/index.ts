@@ -20,7 +20,7 @@ var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
 // Add headers before the routes are defined
-expressApp.use(function(req:any, res:any, next:any) {
+expressApp.use(function (req: any, res: any, next: any) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -349,7 +349,7 @@ expressApp.post("/api/get_personal_rating/", (req: any, res: any) => {
 
 
 expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
-  const { token, cost, title,description,deadline_take,users_limit } = req.body;
+  const { token, cost, title, description, deadline_take, users_limit } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -357,7 +357,7 @@ expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take?mysql.escape(deadline_take):"NULL"}, ${!!users_limit?mysql.escape(users_limit):"NULL"}, '0');`, function (err: any, result: any) {
+        pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0');`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -370,6 +370,19 @@ expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
     }
   })
 })
+
+expressApp.get("/api/get_shop_items/", (req: any, res: any) => {
+  let now = new Date().getTime()
+
+  pool.query(`SELECT * FROM \`shop_items\` WHERE \`deadline_take\` is null AND \`users_limit\`<\`users_taken\` UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`<${now} AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`<${now} AND \`users_limit\`<\`users_taken\``, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      res.send(result)
+    }
+  })
+}
+)
 
 
 server.listen(process.env.PORT || 5000, () => {

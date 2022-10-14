@@ -348,6 +348,30 @@ expressApp.post("/api/get_personal_rating/", (req: any, res: any) => {
 })
 
 
+expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
+  const { token, cost, title,description,deadline_take,users_limit } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take?mysql.escape(deadline_take):"NULL"}, ${!!users_limit?mysql.escape(users_limit):"NULL"}, '0');`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
+
 server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });

@@ -222,18 +222,29 @@ expressApp.post("/api/start_initiative/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
+      pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
-          pool.query(`UPDATE \`initiatives\` SET \`users_taken\`=\`users_taken\`+1 WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
-            if (err) {
-              res.send(err.message)
-            } else {
-              res.send(result)
-            }
-          })
-          res.send(result)
+          let initiative = result
+          if (initiative["users_taken"] < initiative["users_limit"]) {
+            pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
+              if (err) {
+                res.send(err.message)
+              } else {
+                pool.query(`UPDATE \`initiatives\` SET \`users_taken\`=\`users_taken\`+1 WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
+                  if (err) {
+                    res.send(err.message)
+                  } else {
+                    res.send(result)
+                  }
+                })
+                res.send("Вы успешно приступили к выполнению задания!")
+              }
+            })
+          } else {
+            res.send("Достигнуто ограничение на кол-во мест!")
+          }
         }
       })
     }

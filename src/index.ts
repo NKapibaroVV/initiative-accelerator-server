@@ -418,7 +418,13 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
                     if (err) {
                       res.send(err.message)
                     } else {
-                      res.send("Обмен баллов прошел успешно!");
+                      pool.query(`UPDATE \`shop_items\` SET \`users_taken\`=\`users_taken\`+1 WHERE \`id\`='${mysql.escape(shop_item_id)}'`, function (err: any, result: any) {
+                        if (err) {
+                          res.send(err.message)
+                        } else {
+                          res.send("Обмен баллов прошел успешно!");
+                        }
+                      })
                     }
                   })
                 }

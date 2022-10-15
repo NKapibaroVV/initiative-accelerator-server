@@ -158,6 +158,25 @@ expressApp.post('/api/get_me/', (req: any, res: any) => {
   }
 });
 
+expressApp.post("/api/update_profile/", (req: any, res: any) => {
+  const { token, name, surname, email, edu_group, birth, password } = req.body;
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password?`, \`password\`=${mysql.escape(password)}`:""} WHERE \`id\`='${user.id}'`
+      pool.query(sql, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result)
+        }
+      })
+    }
+  })
+})
+
 expressApp.post("/api/get_taken_initiatives/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {

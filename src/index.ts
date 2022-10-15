@@ -415,7 +415,7 @@ expressApp.post("/api/get_initiative_params/", (req: any, res: any) => {
   })
 })
 
-expressApp.get("/api/get_all_shop_items/", (req: any, res: any) => {
+expressApp.post("/api/get_all_shop_items/", (req: any, res: any) => {
   const { token } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {

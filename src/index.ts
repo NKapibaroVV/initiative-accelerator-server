@@ -415,6 +415,52 @@ expressApp.post("/api/get_initiative_params/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_all_shop_items/", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`SELECT * FROM \`shop_items\``, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send("Wrong user role")
+      }
+    }
+  })
+})
+
+expressApp.post("/api/get_shop_item_params/", (req: any, res: any) => {
+  const { token, initiative_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`SELECT * FROM \`shop_items\` WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send("Wrong user role")
+      }
+    }
+  })
+})
+
 expressApp.post("/api/get_personal_rating/", (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SET @rank=0;SET @userScore = (SELECT \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}); SELECT \`position\`,\`score\` FROM ( SELECT @rank:=@rank+1 AS \`position\`, \`token\`, \`score\` FROM ( SELECT \`score\`, \`token\` FROM \`users\` ORDER BY \`score\` DESC ) as t1 ) as t2  WHERE \`score\` = @userScore ORDER BY \`position\` ASC LIMIT 1;`, function (err: any, result: any) {

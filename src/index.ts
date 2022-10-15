@@ -165,7 +165,7 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${edu_group.lenght>0?mysql.escape(edu_group):"NULL"}, \`birth\`=${mysql.escape(birth)}${!!password?`, \`password\`=${mysql.escape(password)}`:""} WHERE \`id\`='${user.id}'`
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password?`, \`password\`=${mysql.escape(password)}`:""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)

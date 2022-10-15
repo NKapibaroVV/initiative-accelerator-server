@@ -346,6 +346,29 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/update_initiative/", (req: any, res: any) => {
+  const { token, initiative_id, title, income, take_deadline, complete_deadline, content, category, users_limit } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`UPDATE \`initiatives\`  SET  \`category\`=${mysql.escape(category)}, \`title\`=${mysql.escape(title)}, \`content\`=${mysql.escape(content)}, \`income\`=${mysql.escape(income)}, \`deadline_take\`=${mysql.escape(take_deadline)}, \`deadline_complete\`=${mysql.escape(complete_deadline)}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send("Wrong user role")
+      }
+    }
+  })
+})
+
 expressApp.post("/api/get_initiative_params/", (req: any, res: any) => {
   const { token, initiative_id } = req.body;
 

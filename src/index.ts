@@ -496,6 +496,29 @@ expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/update_shop_item/", (req: any, res: any) => {
+  const { token, cost, title, description, deadline_take, users_limit, item_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`UPDATE \`shop_items\` SET \`cost\`=${mysql.escape(cost)}, \`title\`=${mysql.escape(title)}, \`description\`=${mysql.escape(description)}, \`deadline_take\`=${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(item_id)};`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
 expressApp.get("/api/get_shop_items/", (req: any, res: any) => {
   let now = new Date().getTime()
 

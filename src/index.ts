@@ -439,7 +439,7 @@ expressApp.post("/api/get_all_shop_items/", (req: any, res: any) => {
 })
 
 expressApp.post("/api/get_shop_item_params/", (req: any, res: any) => {
-  const { token, initiative_id } = req.body;
+  const { token, item_id } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -447,7 +447,7 @@ expressApp.post("/api/get_shop_item_params/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`SELECT * FROM \`shop_items\` WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM \`shop_items\` WHERE \`id\`='${item_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

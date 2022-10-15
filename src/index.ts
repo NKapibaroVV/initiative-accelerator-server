@@ -144,7 +144,7 @@ expressApp.get("/api/get_global_rating/", (req: any, res: any) => {
 expressApp.post('/api/get_me/', (req: any, res: any) => {
   try {
     const { token } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
       if (err) {
         res.send(err.message)
       } else {

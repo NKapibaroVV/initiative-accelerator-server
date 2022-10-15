@@ -227,7 +227,7 @@ expressApp.post("/api/start_initiative/", (req: any, res: any) => {
           res.send(err.message)
         } else {
           let initiative = result[0]
-          if (typeof (initiative.users_limit) == "undefined" || initiative.users_limit > initiative.users_taken) {
+          if (initiative.users_limit == null || initiative.users_limit > initiative.users_taken) {
             pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)

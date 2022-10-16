@@ -428,11 +428,6 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
             console.log(response.data)
             let link = response.data.response.link;
 
-            axios(`https://api.vk.com/method/messages.deleteConversation?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`)
-            axios(`https://api.vk.com/method/messages.removeChatUser?chat_id=${chatId}&user_id=361675873&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`)
-            axios(`https://api.vk.com/method/messages.deleteConversation?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`)
-
-
             pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
@@ -539,7 +534,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`SELECT *, NULL AS comment, NULL AS checked FROM \`initiatives\` INNER JOIN \`initiatives_taken\` ON \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`users\` as u1 ON u1.\`id\`=\`initiatives_taken\`.\`user_id\` WHERE \`initiatives\`.\`id\`=${mysql.escape(initiative_id)} UNION SELECT * FROM \`initiatives\` INNER JOIN \`initiatives_completed\` ON \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`users\` as u0 ON u0.\`id\`=\`initiatives_completed\`.\`user_id\` WHERE \`initiatives\`.\`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+        pool.query(`SELECT *, NULL AS comment, NULL AS checked FROM \`initiatives\` INNER JOIN \`initiatives_taken\` ON \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiatives_completed\` ON \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`users\` ON \`users\`.\`id\`=\`initiatives_taken\`.\`user_id\` AND \`users\`.\`id\`=\`initiatives_completed\`.\`user_id\` WHERE \`initiatives\`.\`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

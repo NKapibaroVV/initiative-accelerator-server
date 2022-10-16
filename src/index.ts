@@ -349,9 +349,9 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
       if (user.role == "Администратор" || user.role == "Модератор") {
         let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`
         axios(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
-          let chatId = response.data.response
+          let chatId = JSON.parse(response.data).response
           axios(`https://api.vk.com/method/messages.createChat?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
-            let link = response.data.response.link;
+            let link = JSON.parse(response.data).response.link;
             res.send()
             pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err: any, result: any) {
               if (err) {

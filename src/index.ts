@@ -91,6 +91,30 @@ expressApp.post("/api/get_user/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/update_user/", (req: any, res: any) => {
+  const { token, user_id, name, surname, email, edu_group, birth, password } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      if (user.role == "Администратор") {
+        pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
 expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
   const { token } = req.body;
   pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {

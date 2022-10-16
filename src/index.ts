@@ -125,12 +125,12 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
       let user = result[0];
 
       if (user.role == "Администратор") {
-        let newPasswrod = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`
-        pool.query(`UPDATE \`users\` SET \`password\`='${newPasswrod}' WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+        let newPassword = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`
+        pool.query(`UPDATE \`users\` SET \`password\`='${newPassword}' WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
-            res.send({newPasswrod})
+            res.send({ newPassword })
           }
         })
       } else {

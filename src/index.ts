@@ -92,7 +92,7 @@ expressApp.post("/api/get_user/", (req: any, res: any) => {
 })
 
 expressApp.post("/api/update_user/", (req: any, res: any) => {
-  const { token, user_id, name, surname, email, edu_group, birth, password } = req.body;
+  const { token, user_id, name, surname, email, edu_group, birth, role } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -101,7 +101,7 @@ expressApp.post("/api/update_user/", (req: any, res: any) => {
       let user = result[0];
 
       if (user.role == "Администратор") {
-        pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+        pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`role\`=${mysql.escape(role)} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

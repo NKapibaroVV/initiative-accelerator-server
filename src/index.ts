@@ -1,6 +1,8 @@
 const express = require('express');
+import axios from "axios";
 import e from "cors";
 import crypto from "crypto-js";
+import { env } from "process";
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -165,7 +167,7 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password?`, \`password\`=${mysql.escape(password)}`:""} WHERE \`id\`='${user.id}'`
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
@@ -345,18 +347,31 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
       let user = result[0];
       let initiative_identifer = uuidv4();
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`INSERT INTO \`initiatives\` (\`id\`, \`category\`, \`title\`, \`content\`, \`income\`, \`deadline_take\`, \`deadline_complete\`, \`users_limit\`, \`users_taken\`) VALUES ('${initiative_identifer}', ${mysql.escape(category)}, ${mysql.escape(title)}, ${mysql.escape(content)}, ${mysql.escape(income)}, ${mysql.escape(take_deadline)}, ${mysql.escape(complete_deadline)}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, 0)`, function (err: any, result: any) {
-          if (err) {
-            res.send(err.message)
-          } else {
-            pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
+        let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`
+        axios(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
+          let chatId = response.data.response
+          axios(`https://api.vk.com/method/messages.createChat?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
+            let link = response.data.link;
+            pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
               } else {
-                res.send(result)
+                pool.query(`INSERT INTO \`initiatives\` (\`id\`, \`category\`, \`title\`, \`content\`, \`income\`, \`deadline_take\`, \`deadline_complete\`, \`users_limit\`, \`users_taken\`) VALUES ('${initiative_identifer}', ${mysql.escape(category)}, ${mysql.escape(title)}, ${mysql.escape(content)}, ${mysql.escape(income)}, ${mysql.escape(take_deadline)}, ${mysql.escape(complete_deadline)}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, 0)`, function (err: any, result: any) {
+                  if (err) {
+                    res.send(err.message)
+                  } else {
+                    pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
+                      if (err) {
+                        res.send(err.message)
+                      } else {
+                        res.send(result)
+                      }
+                    })
+                  }
+                })
               }
             })
-          }
+          })
         })
       } else {
         res.send("Wrong user role")
@@ -617,8 +632,6 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
     }
   })
 })
-
-
 
 
 server.listen(process.env.PORT || 5000, () => {

@@ -356,6 +356,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
             let link = response.data.response.link;
 
             axios(`https://api.vk.com/method/messages.removeChatUser?chat_id=${chatId}&user_id=361675873&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`)
+            axios(`https://api.vk.com/method/messages.deleteConversation?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`)
 
 
             pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err: any, result: any) {

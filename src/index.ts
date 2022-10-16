@@ -530,6 +530,29 @@ expressApp.post("/api/get_initiative_params/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
+  const { token, initiative_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор" || user.role == "Модератор") {
+        pool.query(`SELECT * FROM \`initiatives\` JOIN \`initiatives_taken\` ON \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` JOIN \`initiatives_completed\` ON \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send("Wrong user role")
+      }
+    }
+  })
+})
+
 expressApp.post("/api/get_all_shop_items/", (req: any, res: any) => {
   const { token } = req.body;
 

@@ -539,7 +539,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`SELECT * FROM \`initiatives\` INNER JOIN \`initiatives_taken\` ON \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiatives_completed\` ON \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`users\` as u0 ON u0.\`id\`=\`initiatives_completed\`.\`user_id\` INNER JOIN \`users\` as u1 ON u1.\`id\`=\`initiatives_taken\`.\`user_id\` WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM \`initiatives\` INNER JOIN \`initiatives_taken\` ON \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiatives_completed\` ON \`initiatives_completed\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`users\` as u0 ON u0.\`id\`=\`initiatives_completed\`.\`user_id\` INNER JOIN \`users\` as u1 ON u1.\`id\`=\`initiatives_taken\`.\`user_id\` WHERE \`initiatives\`.\`id\`='${initiative_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {

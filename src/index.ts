@@ -76,7 +76,7 @@ expressApp.post("/api/get_user/", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      if (user.role == "Администратор") {
+      if (user.role == "Администратор" || user.role == "Модератор") {
         pool.query(`SELECT * FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)

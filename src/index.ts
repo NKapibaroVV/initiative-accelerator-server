@@ -32,9 +32,9 @@ expressApp.use(function (req: any, res: any, next: any) {
 const pool = mysql.createPool({
   connectionLimit: 80,
   host: '141.8.195.33',
-  user: 'a0694848_initiative_accelerator',
+  user: 'f0711974_initiative_accelerator',
   password: process.env.DB_PASSWORD,
-  database: 'a0694848_initiative_accelerator',
+  database: 'f0711974_initiative_accelerator',
   multipleStatements: true
 });
 

@@ -162,6 +162,28 @@ expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
   })
 });
 
+expressApp.post(`/api/get_shop_item_stat/`, (req: any, res: any) => {
+  const { token, item_id } = req.body;
+  pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err)
+    } else {
+      let user: any = result[0];
+      let role: string = user.role;
+
+      if (role == "Администратор" || role == "Модератор") {
+        pool.query(`SELECT * from \`shop_logs\` JOIN \`users\` ON \`shop_logs\`.\`user_id\`=\`users\`.\`id\` WHERE \`shop_item_id\`=${mysql.escape(item_id)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err)
+          } else {
+            res.send(result)
+          }
+        })
+      }
+    }
+  })
+});
+
 expressApp.post(`/api/award_user/`, (req: any, res: any) => {
   const { token, initiative_id, user_id, penalty } = req.body;
   pool.query(`SELECT * FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {

@@ -1,7 +1,7 @@
 const express = require('express');
 import axios from "axios";
 import e from "cors";
-import crypto from "crypto-js";
+import crypto, {SHA512} from "crypto-js";
 import { env } from "process";
 const path = require('path');
 const expressApp = express();
@@ -41,7 +41,7 @@ const pool = mysql.createPool({
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(password)}`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password))}`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {
@@ -52,7 +52,7 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
 expressApp.post('/api/reg/', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
-  pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(password)},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
+  pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(SHA512(password))},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {

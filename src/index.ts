@@ -1,7 +1,7 @@
 const express = require('express');
 import axios from "axios";
 import e from "cors";
-import crypto, {SHA512} from "crypto-js";
+import crypto, { SHA512 } from "crypto-js";
 import { env } from "process";
 const path = require('path');
 const expressApp = express();
@@ -150,7 +150,7 @@ expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
       let role: string = user.role;
 
       if (role == "Администратор" || role == "Модератор") {
-        pool.query(`SELECT * from \`users\` WHERE 1`, function (err: any, result: any) {
+        pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`name\` ASC`, function (err: any, result: any) {
           if (err) {
             res.send(err)
           } else {
@@ -492,6 +492,41 @@ expressApp.post("/api/update_initiative/", (req: any, res: any) => {
             res.send(err.message)
           } else {
             res.send(result)
+          }
+        })
+      } else {
+        res.send("Wrong user role")
+      }
+    }
+  })
+})
+
+expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
+  const { token, initiative_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (user.role == "Администратор") {
+        pool.query(`DELETE * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            pool.query(`DELETE * FROM \`initiatives_completed\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+              if (err) {
+                res.send(err.message)
+              } else {
+                pool.query(`DELETE * FROM \`initiatives_taken\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+                  if (err) {
+                    res.send(err.message)
+                  } else {
+                    res.send(result)
+                  }
+                })
+              }
+            })
           }
         })
       } else {

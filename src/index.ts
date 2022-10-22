@@ -150,7 +150,7 @@ expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
       let role: string = user.role;
 
       if (role == "Администратор" || role == "Модератор") {
-        pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`name\` ASC`, function (err: any, result: any) {
+        pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`surname\` ASC`, function (err: any, result: any) {
           if (err) {
             res.send(err)
           } else {

@@ -510,15 +510,15 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор") {
-        pool.query(`DELETE * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+        pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
-            pool.query(`DELETE * FROM \`initiatives_completed\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+            pool.query(`DELETE FROM \`initiatives_completed\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
               } else {
-                pool.query(`DELETE * FROM \`initiatives_taken\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+                pool.query(`DELETE FROM \`initiatives_taken\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
                   if (err) {
                     res.send(err.message)
                   } else {

@@ -600,7 +600,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
             res.send(err.message)
           } else {
             taken = result;
-            pool.query(`SELECT * FROM initiatives_completed INNER JOIN initiatives on initiatives_completed.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_completed.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+            pool.query(`SELECT * FROM initiatives_completed INNER JOIN initiatives on initiatives_completed.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_completed.user_id WHERE initiatives_completed.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
               } else {

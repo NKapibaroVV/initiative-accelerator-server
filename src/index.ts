@@ -604,6 +604,14 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
               if (err) {
                 res.send(err.message)
               } else {
+
+                function removeEmpty(array:any[]) {
+                  let result = array.filter(element => {
+                    return element !== null;
+                  });
+                  return result
+                }
+
                 completed = result;
                 taken.forEach(takenRow => {
                   completed.forEach(completedRow => {
@@ -612,13 +620,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
                   }
                   });
                 });
-                if (!taken[0]==null&&!completed[0]==null) {
-                  res.send([...taken, ...completed])
-                }else if(!taken[0]==null){
-                  res.send(taken)
-                }else{
-                  res.send(completed)
-                }
+                  res.send([...removeEmpty(taken), removeEmpty(completed)])
               }
             })
           }

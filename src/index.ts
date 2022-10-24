@@ -590,12 +590,31 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
+
+      let taken:any[] = [];
+      let completed:any[] = [];
+
       if (user.role == "Администратор" || user.role == "Модератор") {
-        pool.query(`SELECT * FROM initiatives_taken INNER JOIN initiatives on initiatives_taken.initiative_id=initiatives.id RIGHT OUTER JOIN (SELECT * FROM initiatives_completed INNER JOIN initiatives on initiatives_completed.initiative_id=initiatives.id) as second ON second.initiative_id = initiatives_taken.initiative_id INNER JOIN users ON initiatives_taken.user_id=users.id WHERE initiatives_taken.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+        pool.query(`SELECT * FROM initiatives_taken INNER JOIN initiatives on initiatives_taken.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_taken.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
-            res.send(result)
+            taken = result;
+            pool.query(`SELECT * FROM initiatives_completed INNER JOIN initiatives on initiatives_completed.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_completed.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+              if (err) {
+                res.send(err.message)
+              } else {
+                completed = result;
+                taken.forEach(takenRow => {
+                  completed.forEach(completedRow => {
+                  if (completedRow.user_id==takenRow.user_id){
+                    delete taken[taken.indexOf(takenRow)];
+                  }
+                  });
+                });
+                res.send([...taken, ...completed])
+              }
+            })
           }
         })
       } else {

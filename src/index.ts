@@ -612,7 +612,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
                   }
                   });
                 });
-                if (taken!=null&&completed!=null) {
+                if (!taken[0]==null&&!completed[0]==null) {
                   res.send([...taken, ...completed])
                 }else if(taken!=null){
                   res.send(taken)

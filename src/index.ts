@@ -614,7 +614,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
                 });
                 if (!taken[0]==null&&!completed[0]==null) {
                   res.send([...taken, ...completed])
-                }else if(taken!=null){
+                }else if(!taken[0]==null){
                   res.send(taken)
                 }else{
                   res.send(completed)

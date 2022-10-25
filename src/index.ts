@@ -344,7 +344,7 @@ expressApp.post("/api/start_initiative/", (req: any, res: any) => {
         } else {
           let initiative = result[0]
           if (initiative.users_limit == null || initiative.users_limit > initiative.users_taken) {
-            pool.query(`INSERT INTO \`initiatives_taken\` (\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
+            pool.query(`INSERT INTO \`initiatives_taken\` (\`identifer\`,\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(`${user.id}_${initiative_id}`)},${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err: any, result: any) {
               if (err) {
                 res.send(err.message)
               } else {
@@ -374,7 +374,7 @@ expressApp.post("/api/complete_initiative/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      pool.query(`INSERT INTO \`initiatives_completed\` (\`initiative_id\`,\`user_id\`,\`comment\`,\`checked\`) VALUES (${mysql.escape(initiative_id)},${mysql.escape(user.id)},${mysql.escape(comment)},0)`, function (err: any, result: any) {
+      pool.query(`INSERT INTO \`initiatives_completed\` (\`identifer\`,\`initiative_id\`,\`user_id\`,\`comment\`,\`checked\`) VALUES (${mysql.escape(`${user.id}_${initiative_id}`)},${mysql.escape(initiative_id)},${mysql.escape(user.id)},${mysql.escape(comment)},0)`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

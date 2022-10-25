@@ -335,7 +335,7 @@ expressApp.post("/api/start_initiative/", (req: any, res: any) => {
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
-      res.send(err.message)
+      res.send(err.message);
     } else {
       let user = result[0];
       pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {

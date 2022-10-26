@@ -16,7 +16,6 @@ expressApp.use(bodyParser.urlencoded({ extended: false }));
 expressApp.use(bodyParser.json())
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
-const nodemailer = require("nodemailer");
 
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });

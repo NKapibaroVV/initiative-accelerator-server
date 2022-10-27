@@ -9,8 +9,8 @@
   "main": "bild/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && node build/index.js",
-    "build": "tsc --outDir build"
+    "start": "npm run build && node app/index.js",
+    "build": "tsc --outDir app"
   },
   "keywords": [],
   "author": "",

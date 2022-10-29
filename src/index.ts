@@ -39,10 +39,6 @@ const pool = mysql.createPool({
 
 console.log(pool)
 
-expressApp.get('/', (req: any, res: any) => {
-  res.json({serverState:"available"})
-})
-
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`

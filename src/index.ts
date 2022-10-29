@@ -31,11 +31,17 @@ expressApp.use(function (req: any, res: any, next: any) {
 const pool = mysql.createPool({
   connectionLimit: 15,
   host: 'f0711974.xsph.ru',
-  user: 'f0711974_initiative_accelerator',
+  user: 'initiative_accelerator_admin',
   password: process.env.DB_PASSWORD,
   database: 'f0711974_initiative_accelerator',
   multipleStatements: true
 });
+
+console.log(pool)
+
+expressApp.get('/', (req: any, res: any) => {
+  res.json({serverState:"available"})
+})
 
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;

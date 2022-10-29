@@ -41,7 +41,6 @@ console.log(pool)
 
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
-  let login = `${email.split("@")[0]}_${uuidv4()}`
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {
     if (err) {
       res.send(err)

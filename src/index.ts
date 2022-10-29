@@ -31,7 +31,7 @@ expressApp.use(function (req: any, res: any, next: any) {
 const pool = mysql.createPool({
   connectionLimit: 15,
   host: 'f0711974.xsph.ru',
-  user: 'initiative_accelerator_admin',
+  user: 'initiative_accelerator',
   password: process.env.DB_PASSWORD,
   database: 'f0711974_initiative_accelerator',
   multipleStatements: true

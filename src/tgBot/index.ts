@@ -9,6 +9,6 @@ export class tgBot{
     }
 
     static sendMessage(chatId:string,text:string,format:"MarkdownV2"|"HTML"|"Markdown"|"",disableNotification:boolean,){
-        axios(`https://api.telegram.org/bot${tgBot.token}/sendMessage?chat_id=${chatId}&text=${encodeURI(text)}&parse_mode=${format},disable_notification=${disableNotification.toString()}`)
+        axios(`https://api.telegram.org/bot${tgBot.token}/sendMessage?chat_id=${chatId}&text=${encodeURI(text)}&parse_mode=${format}&disable_notification=${disableNotification.toString()}`)
     }
 }

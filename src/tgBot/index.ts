@@ -1,23 +1,15 @@
-import axios from "axios";
+import TelegramBot, { ParseMode } from "node-telegram-bot-api";
 
-export class tgBot{
+export class telegramBot{
 
-    static token:string = process.env.TG_BOT_TOKEN!;
-    
+    token:string = process.env.TG_BOT_TOKEN!;
+    bot:TelegramBot = new TelegramBot(this.token, {polling: false});
     constructor (token?:string){
-        token?tgBot.token = token:null;
+        token?this.token = token:null;
+        this.bot = new TelegramBot(this.token, {polling: false});
     }
 
-    static sendMessage(chatId:string,text:string,format:"MarkdownV2"|"HTML"|"Markdown"|"",disableNotification:boolean,){
-        axios({
-            method: 'post',
-            url: `https://api.telegram.org/bot${tgBot.token}/sendMessage`,
-            data: {
-                chat_id:chatId,
-                text:text,
-                parse_mode:format,
-                disable_notification:disableNotification
-            }
-          });
+    public sendMessage(chatId:string,text:string,format:ParseMode,disableNotification:boolean,){
+        this.bot.sendMessage(chatId,text,{parse_mode:format,disable_notification:disableNotification});
     }
 }

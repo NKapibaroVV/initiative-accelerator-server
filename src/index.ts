@@ -3,7 +3,7 @@ import axios from "axios";
 import e from "cors";
 import crypto, { SHA512 } from "crypto-js";
 import { env } from "process";
-import { tgBot } from "./tgBot";
+import { telegramBot } from "./tgBot";
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -20,6 +20,8 @@ const { v4: uuidv4 } = require('uuid');
 
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
+
+const tgBot = new telegramBot();
 
 // Add headers before the routes are defined
 expressApp.use(function (req: any, res: any, next: any) {

@@ -12,4 +12,27 @@ export class telegramBot{
     public sendMessage(chatId:string,text:string,format:ParseMode,disableNotification:boolean,){
         this.bot.sendMessage(chatId,text,{parse_mode:format,disable_notification:disableNotification});
     }
+
+    static escapeMarkdown(text:string){
+        let escaped:string = text
+        .replace(/\_/g, '\\_')
+        .replace(/\*/g, '\\*')
+        .replace(/\[/g, '\\[')
+        .replace(/\]/g, '\\]')
+        .replace(/\(/g, '\\(')
+        .replace(/\)/g, '\\)')
+        .replace(/\~/g, '\\~')
+        .replace(/\`/g, '\\`')
+        .replace(/\>/g, '\\>')
+        .replace(/\#/g, '\\#')
+        .replace(/\+/g, '\\+')
+        .replace(/\-/g, '\\-')
+        .replace(/\=/g, '\\=')
+        .replace(/\|/g, '\\|')
+        .replace(/\{/g, '\\{')
+        .replace(/\}/g, '\\}')
+        .replace(/\./g, '\\.')
+        .replace(/\!/g, '\\!')
+        return escaped;
+    }
 }

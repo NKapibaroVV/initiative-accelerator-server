@@ -470,15 +470,15 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                           tgBot.sendMessage("@mospedreserv",
                             `
 В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание\!
-Название: *${title.replace("*","\*")}*
-Категория:*${category}*
+Название: *${telegramBot.escapeMarkdown(title) }*
+Категория:*${telegramBot.escapeMarkdown(category)}*
 Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
 Можно начать выполнять до: *${!!take_deadline ? new Date(take_deadline).toLocaleString() : "Не ограничено"}*
 Нужно выполнять до: *${!!complete_deadline ? new Date(complete_deadline).toLocaleString() : "Не ограничено"}*
-Награда: *${income.toString().replace("*","\*")} баллов*
+Награда: *${income} баллов*
 
 *Описание:*
-||${content.replace("|","\|")}||
+||${telegramBot.escapeMarkdown(content)}||
 
 Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/).
 

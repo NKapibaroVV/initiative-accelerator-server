@@ -3,6 +3,7 @@ import axios from "axios";
 import e from "cors";
 import crypto, { SHA512 } from "crypto-js";
 import { env } from "process";
+import { tgBot } from "./tgBot";
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -433,7 +434,7 @@ expressApp.post("/api/get_initiative_results/", (req: any, res: any) => {
 })
 
 expressApp.post("/api/add_initiative/", (req: any, res: any) => {
-  const { token, title, income, take_deadline, complete_deadline, content, category, users_limit } = req.body;
+  const { token, title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate } : { token:string, title:string, income:number, take_deadline:number, complete_deadline:number, content:string, category:string, users_limit:number, isPrivate?:boolean } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -447,22 +448,43 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
           console.log(response.data)
           let chatId = response.data.response
           axios(`https://api.vk.com/method/messages.getInviteLink?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
-            console.log(response.data)
+            console.log(response.data);
             let link = response.data.response.link;
 
             pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err: any, result: any) {
               if (err) {
-                res.send(err.message)
+                res.send(err.message);
               } else {
                 pool.query(`INSERT INTO \`initiatives\` (\`id\`, \`category\`, \`title\`, \`content\`, \`income\`, \`deadline_take\`, \`deadline_complete\`, \`users_limit\`, \`users_taken\`) VALUES ('${initiative_identifer}', ${mysql.escape(category)}, ${mysql.escape(title)}, ${mysql.escape(content)}, ${mysql.escape(income)}, ${mysql.escape(take_deadline)}, ${mysql.escape(complete_deadline)}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, 0)`, function (err: any, result: any) {
                   if (err) {
-                    res.send(err.message)
+                    res.send(err.message);
                   } else {
                     pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
                       if (err) {
                         res.send(err.message)
                       } else {
-                        res.send(result)
+                        res.send(result);
+                        if (!isPrivate) {
+                          tgBot.sendMessage("mospedreserv",
+                            `
+В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание!
+Название: *${title.replace("*","\*")}*
+Категория:*${category}*
+Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
+Можно начать выполнять до: *${!!take_deadline ? new Date(take_deadline).toLocaleString() : "Не ограничено"}*
+Нужно выполнять до: *${!!complete_deadline ? new Date(complete_deadline).toLocaleString() : "Не ограничено"}*
+Награда: *${income.toString().replace("*","\*")} баллов*
+
+*Описание:*
+||${content.replace("|","\|")}||
+
+Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/).
+
+P.S.
+||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить.||
+`
+                            , "MarkdownV2", false);
+                        }
                       }
                     })
                   }
@@ -472,7 +494,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
           })
         })
       } else {
-        res.send("Wrong user role")
+        res.send("Wrong user role");
       }
     }
   })
@@ -597,8 +619,8 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      let taken:any[] = [];
-      let completed:any[] = [];
+      let taken: any[] = [];
+      let completed: any[] = [];
 
       if (user.role == "Администратор" || user.role == "Модератор") {
         pool.query(`SELECT * FROM initiatives_taken INNER JOIN initiatives on initiatives_taken.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_taken.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
@@ -611,7 +633,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
                 res.send(err.message)
               } else {
 
-                function removeEmpty(array:any[]) {
+                function removeEmpty(array: any[]) {
                   let result = array.filter(element => {
                     return element !== null;
                   });
@@ -621,14 +643,14 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
                 completed = result;
                 taken.forEach(takenRow => {
                   completed.forEach(completedRow => {
-                  if (completedRow.user_id==takenRow.user_id){
-                    delete taken[taken.indexOf(takenRow)];
-                  }
+                    if (completedRow.user_id == takenRow.user_id) {
+                      delete taken[taken.indexOf(takenRow)];
+                    }
                   });
                 });
                 taken = removeEmpty(taken);
                 completed = removeEmpty(completed);
-                res.send([...completed,...taken])
+                res.send([...completed, ...taken])
               }
             })
           }

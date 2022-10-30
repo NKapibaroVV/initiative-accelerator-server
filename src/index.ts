@@ -487,7 +487,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
 P\\.S\\.
 ||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить\\.||
 `
-                            , "MarkdownV2", false);
+                            , "MarkdownV2", false, true);
                         }
                       }
                     })

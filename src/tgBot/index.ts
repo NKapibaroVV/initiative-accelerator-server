@@ -9,8 +9,8 @@ export class telegramBot{
         this.bot = new TelegramBot(this.token, {polling: false});
     }
 
-    public sendMessage(chatId:string,text:string,format:ParseMode,disableNotification:boolean,){
-        this.bot.sendMessage(chatId,text,{parse_mode:format,disable_notification:disableNotification});
+    public sendMessage(chatId:string,text:string,format:ParseMode,disableNotification:boolean,disableWebPreview:boolean){
+        this.bot.sendMessage(chatId,text,{parse_mode:format,disable_notification:disableNotification, disable_web_page_preview:disableWebPreview});
     }
 
     static escapeMarkdown(text:string){

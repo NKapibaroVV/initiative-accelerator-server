@@ -476,7 +476,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
 Категория:*${telegramBot.escapeMarkdown(category)}*
 Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
 Можно начать выполнять до: *${!!take_deadline ? new Date(take_deadline).toLocaleString() : "Не ограничено"}*
-Нужно выполнять до: *${!!complete_deadline ? new Date(complete_deadline).toLocaleString() : "Не ограничено"}*
+Нужно выполнить до: *${!!complete_deadline ? new Date(complete_deadline).toLocaleString() : "Не ограничено"}*
 Награда: *${income} баллов*
 
 *Описание:*

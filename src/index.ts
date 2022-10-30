@@ -480,12 +480,12 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
 Награда: *${income} баллов*
 
 *Описание:*
-||${telegramBot.escapeMarkdown(content)}||
+${telegramBot.escapeMarkdown(content)}
 
 Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)\\.
 
 P\\.S\\.
-||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить\\.||
+Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить\\.
 `
                             , "MarkdownV2", false, true);
                         }

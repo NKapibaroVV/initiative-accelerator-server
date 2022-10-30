@@ -467,26 +467,11 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                       } else {
                         res.send(result);
                         if (!isPrivate) {
-                          console.log(`
-                          В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \\!
-                          Название: *${telegramBot.escapeMarkdown(title) }*
-                          Категория:*${telegramBot.escapeMarkdown(category)}*
-                          Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
-                          Можно начать выполнять до: *${!!take_deadline ? new Date(take_deadline).toLocaleString() : "Не ограничено"}*
-                          Нужно выполнять до: *${!!complete_deadline ? new Date(complete_deadline).toLocaleString() : "Не ограничено"}*
-                          Награда: *${income} баллов*
                           
-                          *Описание:*
-                          ||${telegramBot.escapeMarkdown(content)}||
-                          
-                          Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/).
-                          
-                          P.S.
-                          ||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить.||
-                          `)
                           tgBot.sendMessage("@mospedreserv",
                             `
 В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \\!
+
 Название: *${telegramBot.escapeMarkdown(title) }*
 Категория:*${telegramBot.escapeMarkdown(category)}*
 Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
@@ -497,10 +482,10 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
 *Описание:*
 ||${telegramBot.escapeMarkdown(content)}||
 
-Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/).
+Для того чтобы принять участие в этом задании перейдите в [личный кабинет](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)\\.
 
-P.S.
-||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить.||
+P\\.S\\.
+||Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить\\.||
 `
                             , "MarkdownV2", false);
                         }

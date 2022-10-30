@@ -465,7 +465,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                       } else {
                         res.send(result);
                         if (!isPrivate) {
-                          tgBot.sendMessage("mospedreserv",
+                          tgBot.sendMessage("@mospedreserv",
                             `
 В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание!
 Название: *${title.replace("*","\*")}*

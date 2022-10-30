@@ -468,7 +468,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                         res.send(result);
                         if (!isPrivate) {
                           console.log(`
-                          В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \!
+                          В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \\!
                           Название: *${telegramBot.escapeMarkdown(title) }*
                           Категория:*${telegramBot.escapeMarkdown(category)}*
                           Мест: *${!!users_limit ? users_limit : "Не ограничено"}*

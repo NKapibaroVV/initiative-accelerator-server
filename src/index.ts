@@ -269,7 +269,7 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""}${!!avatarURI ? `, \`avatar\`=${mysql.escape(avatar)}` : ""} WHERE \`id\`='${user.id}'`
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""}${!!avatarURI ? `, \`avatarURI\`=${mysql.escape(avatar)}` : ""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)

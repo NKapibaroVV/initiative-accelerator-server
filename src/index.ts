@@ -259,13 +259,17 @@ expressApp.post('/api/get_me/', (req: any, res: any) => {
 });
 
 expressApp.post("/api/update_profile/", (req: any, res: any) => {
-  const { token, name, surname, email, edu_group, birth, password } = req.body;
+  const { token, name, surname, email, edu_group, birth, password, avatar } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
       let user = result[0];
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""} WHERE \`id\`='${user.id}'`
+      let avatarURI:string|null = null;
+      if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
+        avatarURI = avatar;
+      }
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""}${!!avatarURI ? `, \`avatar\`=${mysql.escape(avatar)}` : ""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
@@ -436,7 +440,7 @@ expressApp.post("/api/get_initiative_results/", (req: any, res: any) => {
 })
 
 expressApp.post("/api/add_initiative/", (req: any, res: any) => {
-  const { token, title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate } : { token:string, title:string, income:number, take_deadline:number, complete_deadline:number, content:string, category:string, users_limit:number, isPrivate?:boolean } = req.body;
+  const { token, title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate }: { token: string, title: string, income: number, take_deadline: number, complete_deadline: number, content: string, category: string, users_limit: number, isPrivate?: boolean } = req.body;
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
@@ -467,12 +471,12 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                       } else {
                         res.send(result);
                         if (!isPrivate) {
-                          
+
                           tgBot.sendMessage("@mospedreserv",
                             `
 В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \\!
 
-Название: *${telegramBot.escapeMarkdown(title) }*
+Название: *${telegramBot.escapeMarkdown(title)}*
 Категория:*${telegramBot.escapeMarkdown(category)}*
 Мест: *${!!users_limit ? users_limit : "Не ограничено"}*
 Можно начать выполнять до: *${!!take_deadline ? new Date(take_deadline).toLocaleString() : "Не ограничено"}*

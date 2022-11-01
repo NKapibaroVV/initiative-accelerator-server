@@ -56,7 +56,7 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
     if (err) {
       res.send(err)
     } else {
-      res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000, sameSite: 'none', secure: true, httpOnly: false })
+      res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000, sameSite: 'none', secure: true, httpOnly: true })
         .send(result)
     }
   })

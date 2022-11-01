@@ -30,7 +30,6 @@ expressApp.use(function (req: any, res: any, next: any) {
   next();
 });
 
-
 const pool = mysql.createPool({
   connectionLimit: 15,
   host: 'f0711974.xsph.ru',

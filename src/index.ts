@@ -28,12 +28,13 @@ expressApp.use(function (req: any, res: any, next: any) {
   const allowedOrigins = ['http://localhost:3000', 'https://initiative-accelerator-front-alexc-ux.vercel.app', 'http://initiative-accelerator-front-alexc-ux.vercel.app/'];
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-    expressApp.use(cors({ credentials: true, origin: origin }));
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", true);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   next();
 });
-
-
 
 const cookieParser = require('cookie-parser');
 expressApp.use(cookieParser());

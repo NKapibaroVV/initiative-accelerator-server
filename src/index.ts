@@ -287,7 +287,10 @@ expressApp.post("/api/get_taken_initiatives/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let sql = `SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiative_conversations\` ON \`initiative_conversations\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
+      let sql = "";
+      if (!!user.id) {
+        sql=`SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiative_conversations\` ON \`initiative_conversations\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
+      }
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)

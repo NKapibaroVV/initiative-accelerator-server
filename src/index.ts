@@ -230,7 +230,7 @@ expressApp.get("/api/get_global_rating/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let scores = result;
-      pool.query(`SELECT \`name\`, \`surname\`, \`score\` FROM \`users\` WHERE \`score\`>${scores[scores.length - 1].score - 1} ORDER BY \`score\` DESC`, function (err: any, result: any) {
+      pool.query(`SELECT \`name\`, \`surname\`, \`score\`, \`avatarURI\` FROM \`users\` WHERE \`score\`>${scores[scores.length - 1].score - 1} ORDER BY \`score\` DESC`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

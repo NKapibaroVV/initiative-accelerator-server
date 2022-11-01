@@ -25,7 +25,9 @@ const tgBot = new telegramBot();
 
 // Add headers before the routes are defined
 expressApp.use(function (req: any, res: any, next: any) {
-  res.header("Access-Control-Allow-Origin", "*");
+  ["http://localhost:3000", "https://initiative-accelerator-front-alexc-ux.vercel.app","http://initiative-accelerator-front-alexc-ux.vercel.app/"].map(domain => {
+  res.setHeader("Access-Control-Allow-Origin", domain);
+});
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Credentials", true);
   next();

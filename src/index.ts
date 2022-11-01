@@ -30,6 +30,8 @@ expressApp.use(function (req: any, res: any, next: any) {
   next();
 });
 
+const cookieParser = require('cookie-parser');
+expressApp.use(cookieParser());
 
 const pool = mysql.createPool({
   connectionLimit: 15,
@@ -48,6 +50,7 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
     if (err) {
       res.send(err)
     } else {
+      res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
       res.send(result)
     }
   })
@@ -63,6 +66,7 @@ expressApp.post('/api/reg/', (req: any, res: any) => {
         if (err) {
           res.send(err)
         } else {
+          res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
           res.send(result)
         }
       });
@@ -265,7 +269,7 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let avatarURI:string|null = null;
+      let avatarURI: string | null = null;
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }

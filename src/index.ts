@@ -28,7 +28,7 @@ expressApp.use(function (req: any, res: any, next: any) {
   const allowedOrigins = ['http://localhost:3000', 'https://initiative-accelerator-front-alexc-ux.vercel.app', 'http://initiative-accelerator-front-alexc-ux.vercel.app/'];
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-       res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", true);
@@ -56,8 +56,8 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
     if (err) {
       res.send(err)
     } else {
-      res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
-      .send(result)
+      res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000, sameSite: 'none' })
+        .send(result)
     }
   })
 })
@@ -72,8 +72,8 @@ expressApp.post('/api/reg/', (req: any, res: any) => {
         if (err) {
           res.send(err)
         } else {
-          res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
-          .send(result)
+          res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000, sameSite: 'none' })
+            .send(result)
         }
       });
     }

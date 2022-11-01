@@ -52,7 +52,7 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
       res.send(err)
     } else {
       res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
-      res.send(result)
+      .send(result)
     }
   })
 })
@@ -68,7 +68,7 @@ expressApp.post('/api/reg/', (req: any, res: any) => {
           res.send(err)
         } else {
           res.cookie('userData', JSON.stringify(result), { maxAge: 24 * 60 * 60 * 1000 })
-          res.send(result)
+          .send(result)
         }
       });
     }

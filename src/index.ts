@@ -201,7 +201,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
             res.send(err)
           } else {
             let initiativeIncome: number = result[0].income;
-            addLog(user.id,`USER AWARDED {'user_awarded_id':${mysql.escape(user_id)},'penalty':${mysql.escape(penalty)},'initiative_id':${mysql.escape(initiative_id)}}`).then(()=> pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+            addLog(user.id,`USER AWARDED {'user_awarded_id':${mysql.escape(user_id)},'penalty':${mysql.escape(penalty)},'initiative_id':${mysql.escape(initiative_id)}}`).then(()=> {pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
               if (err) {
                 res.send(err)
               } else {
@@ -213,7 +213,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
                   }
                 })
               }
-            }))
+            })})
           }
         })
       }
@@ -467,7 +467,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                   if (err) {
                     res.send(err.message);
                   } else {
-                    addLog(user.id,`USER CREATED INITIATIVE {'params':${mysql.escape(JSON.stringify({title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate}))}}`).then(()=> pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
+                    addLog(user.id,`USER CREATED INITIATIVE {'params':${mysql.escape(JSON.stringify({title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate}))}}`).then(()=> {pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
                       if (err) {
                         res.send(err.message)
                       } else {
@@ -496,7 +496,7 @@ P\\.S\\.
                             , "MarkdownV2", false, true);
                         }
                       }
-                    }))
+                    })})
                   }
                 })
               }
@@ -542,7 +542,7 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор") {
-        addLog(user.id,`USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(()=>pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+        addLog(user.id,`USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(()=>{pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -566,7 +566,7 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
               }
             })
           }
-        }))
+        })})
       } else {
         res.send("Wrong user role")
       }

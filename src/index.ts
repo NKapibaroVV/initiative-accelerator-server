@@ -201,7 +201,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
             res.send(err)
           } else {
             let initiativeIncome: number = result[0].income;
-            pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+            addLog(user.id,`USER AWARDED {'user_awarded_id':${mysql.escape(user_id)},'penalty':${mysql.escape(penalty)},'initiative_id':${mysql.escape(initiative_id)}}`).then(()=> pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
               if (err) {
                 res.send(err)
               } else {
@@ -213,7 +213,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
                   }
                 })
               }
-            })
+            }))
           }
         })
       }
@@ -264,7 +264,7 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let avatarURI:string|null = null;
+      let avatarURI: string | null = null;
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }
@@ -288,8 +288,8 @@ expressApp.post("/api/get_taken_initiatives/", (req: any, res: any) => {
     } else {
       let user = result[0];
       let sql = "";
-      if (!!user&&!!user.id) {
-        sql=`SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiative_conversations\` ON \`initiative_conversations\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
+      if (!!user && !!user.id) {
+        sql = `SELECT * FROM \`initiatives_taken\` INNER JOIN \`initiatives\` on \`initiatives_taken\`.\`initiative_id\`=\`initiatives\`.\`id\` INNER JOIN \`initiative_conversations\` ON \`initiative_conversations\`.\`initiative_id\`=\`initiatives\`.\`id\` WHERE user_id='${user.id}'`
       }
       pool.query(sql, function (err: any, result: any) {
         if (err) {
@@ -467,7 +467,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                   if (err) {
                     res.send(err.message);
                   } else {
-                    pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
+                    addLog(user.id,`USER CREATED INITIATIVE {'params':${mysql.escape(JSON.stringify({title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate}))}}`).then(()=> pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
                       if (err) {
                         res.send(err.message)
                       } else {
@@ -496,7 +496,7 @@ P\\.S\\.
                             , "MarkdownV2", false, true);
                         }
                       }
-                    })
+                    }))
                   }
                 })
               }
@@ -542,7 +542,7 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор") {
-        pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+        addLog(user.id,`USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(()=>pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -566,7 +566,7 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
               }
             })
           }
-        })
+        }))
       } else {
         res.send("Wrong user role")
       }
@@ -860,3 +860,16 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
 server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
+
+function addLog(userId: string, message: string) {
+  return new Promise(function (resolve, reject) {
+    pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${new Date().getTime()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err: any, result: any) {
+      if (err) {
+        reject(err);
+      }else{
+        resolve(true);
+      }
+    })
+  });
+
+}

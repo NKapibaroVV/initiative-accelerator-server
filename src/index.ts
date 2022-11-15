@@ -275,7 +275,7 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
         if (err) {
           res.send(err.message)
         } else {
-          let rank = JSON.parse(result[0]).rank;
+          let rank = result[0].rank;
           res.json({rank:rank/5});
         }
       })

@@ -201,19 +201,21 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
             res.send(err)
           } else {
             let initiativeIncome: number = result[0].income;
-            addLog(user.id,`USER AWARDED {'user_awarded_id':${mysql.escape(user_id)},'penalty':${mysql.escape(penalty)},'initiative_id':${mysql.escape(initiative_id)}}`).then(()=> {pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
-              if (err) {
-                res.send(err)
-              } else {
-                pool.query(`UPDATE \`initiatives_completed\` SET checked=1 where initiative_id='${initiative_id}' AND user_id='${user_id}'`, function (err: any, result: any) {
-                  if (err) {
-                    res.send(err)
-                  } else {
-                    res.send({ success: "true" })
-                  }
-                })
-              }
-            })})
+            addAdminLog(user.id, `USER AWARDED {'user_awarded_id':${mysql.escape(user_id)},'penalty':${mysql.escape(penalty)},'initiative_id':${mysql.escape(initiative_id)}}`).then(() => {
+              pool.query(`UPDATE \`users\` SET \`score\`=\`score\`+${initiativeIncome}${penalty ? `-${penalty}` : ``} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+                if (err) {
+                  res.send(err)
+                } else {
+                  pool.query(`UPDATE \`initiatives_completed\` SET checked=1 where initiative_id='${initiative_id}' AND user_id='${user_id}'`, function (err: any, result: any) {
+                    if (err) {
+                      res.send(err)
+                    } else {
+                      res.send({ success: "true" })
+                    }
+                  })
+                }
+              })
+            })
           }
         })
       }
@@ -256,6 +258,29 @@ expressApp.post('/api/get_me/', (req: any, res: any) => {
     res.send(e.message);
   }
 });
+
+expressApp.post("/api/get_rank/", (req: any, res: any) => {
+  const { token } = req.body;
+
+  //SELECT SUM(cost) FROM \`shop_logs\` INNER JOIN \`shop_items\` ON \`shop_logs\`.\`shop_item_id\`=\`shop_items\`.\`id\` WHERE \`shop_logs\`.\`user_id\`='88db4263-6ccc-4af0-b4ac-850db6b49edd';
+
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      pool.query(`SELECT SUM(cost) as rank FROM \`shop_logs\` INNER JOIN \`shop_items\` ON \`shop_logs\`.\`shop_item_id\`=\`shop_items\`.\`id\` WHERE \`shop_logs\`.\`user_id\`=${mysql.escape(user.id)}`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result[0].rank/5);
+        }
+      })
+    }
+  })
+})
 
 expressApp.post("/api/update_profile/", (req: any, res: any) => {
   const { token, name, surname, email, edu_group, birth, password, avatar } = req.body;
@@ -467,15 +492,16 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
                   if (err) {
                     res.send(err.message);
                   } else {
-                    addLog(user.id,`USER CREATED INITIATIVE {'params':${mysql.escape(JSON.stringify({title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate}))}}`).then(()=> {pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
-                      if (err) {
-                        res.send(err.message)
-                      } else {
-                        res.send(result);
-                        if (!isPrivate) {
+                    addAdminLog(user.id, `USER CREATED INITIATIVE {'params':${mysql.escape(JSON.stringify({ title, income, take_deadline, complete_deadline, content, category, users_limit, isPrivate }))}}`).then(() => {
+                      pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_identifer}'`, function (err: any, result: any) {
+                        if (err) {
+                          res.send(err.message)
+                        } else {
+                          res.send(result);
+                          if (!isPrivate) {
 
-                          tgBot.sendMessage("@mospedreserv",
-                            `
+                            tgBot.sendMessage("@mospedreserv",
+                              `
 В *[акселераторе инициатив](https://initiative-accelerator-front-alexc-ux.vercel.app/cab/)* новое задание \\!
 
 Название: *${telegramBot.escapeMarkdown(title)}*
@@ -493,10 +519,11 @@ ${telegramBot.escapeMarkdown(content)}
 P\\.S\\.
 Задание будет отображаться у всех пользователей до тех пор, пока к его выполнению возможно приступить\\.
 `
-                            , "MarkdownV2", false, true);
+                              , "MarkdownV2", false, true);
+                          }
                         }
-                      }
-                    })})
+                      })
+                    })
                   }
                 })
               }
@@ -542,31 +569,33 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (user.role == "Администратор") {
-        addLog(user.id,`USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(()=>{pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
-          if (err) {
-            res.send(err.message)
-          } else {
-            pool.query(`DELETE FROM \`initiatives_completed\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
-              if (err) {
-                res.send(err.message)
-              } else {
-                pool.query(`DELETE FROM \`initiatives_taken\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
-                  if (err) {
-                    res.send(err.message)
-                  } else {
-                    pool.query(`UPDATE \`initiatives\` SET users_taken=users_taken-1 WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
-                      if (err) {
-                        res.send(err.message)
-                      } else {
-                        res.send(result)
-                      }
-                    })
-                  }
-                })
-              }
-            })
-          }
-        })})
+        addAdminLog(user.id, `USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(() => {
+          pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+            if (err) {
+              res.send(err.message)
+            } else {
+              pool.query(`DELETE FROM \`initiatives_completed\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+                if (err) {
+                  res.send(err.message)
+                } else {
+                  pool.query(`DELETE FROM \`initiatives_taken\` WHERE \`initiative_id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+                    if (err) {
+                      res.send(err.message)
+                    } else {
+                      pool.query(`UPDATE \`initiatives\` SET users_taken=users_taken-1 WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
+                        if (err) {
+                          res.send(err.message)
+                        } else {
+                          res.send(result)
+                        }
+                      })
+                    }
+                  })
+                }
+              })
+            }
+          })
+        })
       } else {
         res.send("Wrong user role")
       }
@@ -861,12 +890,12 @@ server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
 
-function addLog(userId: string, message: string) {
+function addAdminLog(userId: string, message: string) {
   return new Promise(function (resolve, reject) {
     pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${new Date().getTime()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err: any, result: any) {
       if (err) {
         reject(err);
-      }else{
+      } else {
         resolve(true);
       }
     })

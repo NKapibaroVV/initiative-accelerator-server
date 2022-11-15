@@ -277,7 +277,7 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
         } else {
           let rank = result[0].rank;
           let count = result[0].count;
-          res.json({rank:(Math.floor(((((rank*count)/5)*0.35)+(count/3|0)+count)*10))});
+          res.json({rank:Math.floor(((((rank*count)/5)*0.35)+(count/3|0)+count)*10)});
         }
       })
     }

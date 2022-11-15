@@ -271,12 +271,12 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      pool.query(`SELECT SUM(cost) as rank FROM \`shop_logs\` INNER JOIN \`shop_items\` ON \`shop_logs\`.\`shop_item_id\`=\`shop_items\`.\`id\` WHERE \`shop_logs\`.\`user_id\`=${mysql.escape(user.id)}`, function (err: any, result: any) {
+      pool.query(`SELECT SUM(cost) as rank, COUNT(cost) as count FROM \`shop_logs\` INNER JOIN \`shop_items\` ON \`shop_logs\`.\`shop_item_id\`=\`shop_items\`.\`id\` WHERE \`shop_logs\`.\`user_id\`=${mysql.escape(user.id)}`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {
           let rank = result[0].rank;
-          res.json({rank:(Math.floor(((rank/5)+(rank%5)+(rank**(1/2)))*10))});
+          res.json({rank:(Math.floor(((rank/5)+(rank%5))*10))});
         }
       })
     }

@@ -810,7 +810,7 @@ expressApp.post("/api/update_shop_item/", (req: any, res: any) => {
 expressApp.get("/api/get_shop_items/", (req: any, res: any) => {
   let now = new Date().getTime()
 
-  pool.query(`SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\``, function (err: any, result: any) {
+  pool.query(`SELECT * FROM \`shop_items\` LEFT OUTER JOIN \`shop_logs\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE \`shop_items\`.\`deadline_take\` IS NULL AND \`shop_items\`.\`users_limit\`>\`shop_items\`.\`users_taken\` UNION SELECT * FROM \`shop_items\` LEFT OUTER JOIN \`shop_logs\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE \`shop_items\`.\`deadline_take\`>${now} AND \`shop_items\`.\`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` LEFT OUTER JOIN \`shop_logs\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE \`shop_items\`.\`deadline_take\` IS NULL AND \`shop_items\`.\`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` LEFT OUTER JOIN \`shop_logs\` ON \`shop_items\`.\`id\`=\`shop_logs\`.\`shop_item_id\` WHERE \`shop_items\`.\`deadline_take\`>${now} AND \`shop_items\`.\`users_limit\`>\`shop_items\`.\`users_taken\``, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {

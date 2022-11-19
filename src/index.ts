@@ -143,9 +143,9 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
                 res.send(err.message)
               } else {
                 let client = resultuser[0];
-                res.send({ newPassword: "Отправлен на почту пользователя ()" })
+                res.send({ newPassword: "Пароль отправлен на почту пользователя" })
 
-                SendServiceEmail.sendText({subject:"Восстановление пароля администратором",recipient:client.email,text:"Ваш новый пароль для входа: "+newPassword+"\n\nПароль сбросил администратор "+user.login})
+                SendServiceEmail.sendText({subject:"Восстановление пароля администратором",recipient:client.email,text:"Ваш новый пароль для входа: "+newPassword+"\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор "+user.login})
 
               }
             })

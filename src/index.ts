@@ -3,6 +3,7 @@ import axios from "axios";
 import e from "cors";
 import crypto, { SHA512 } from "crypto-js";
 import { env } from "process";
+import { SendServiceEmail } from "./Mailer";
 import { telegramBot } from "./tgBot";
 const path = require('path');
 const expressApp = express();
@@ -22,6 +23,8 @@ var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 
 const tgBot = new telegramBot();
+
+SendServiceEmail.sendText({recipient:process.env.SERVICE_EMAIL!,subject:"Системное сообщение о запуске", text:`Выполнен запуск сервера в ${new Date().toLocaleString()}`})
 
 // Add headers before the routes are defined
 expressApp.use(function (req: any, res: any, next: any) {

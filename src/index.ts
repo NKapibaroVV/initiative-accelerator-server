@@ -85,7 +85,7 @@ expressApp.post("/api/get_user/", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -445,7 +445,7 @@ expressApp.post("/api/get_initiatives_results/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT DISTINCT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`checked\`=0 GROUP BY \`initiative_id\``, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -469,7 +469,7 @@ expressApp.post("/api/get_initiative_results/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` JOIN \`users\` on \`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`='${initiative_id}' AND \`checked\`=0`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -493,7 +493,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
     } else {
       let user = result[0];
       let initiative_identifer = uuidv4();
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`
         axios(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
           console.log(response.data)
@@ -563,7 +563,7 @@ expressApp.post("/api/update_initiative/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`UPDATE \`initiatives\`  SET  \`category\`=${mysql.escape(category)}, \`title\`=${mysql.escape(title)}, \`content\`=${mysql.escape(content)}, \`income\`=${mysql.escape(income)}, \`deadline_take\`=${mysql.escape(take_deadline)}, \`deadline_complete\`=${mysql.escape(complete_deadline)}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -629,7 +629,7 @@ expressApp.post("/api/get_all_initiatives/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM  \`initiatives\``, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -652,7 +652,7 @@ expressApp.post("/api/get_initiative_params/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -679,7 +679,7 @@ expressApp.post("/api/get_initiative_members/", (req: any, res: any) => {
       let taken: any[] = [];
       let completed: any[] = [];
 
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM initiatives_taken INNER JOIN initiatives on initiatives_taken.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_taken.initiative_id=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -727,7 +727,7 @@ expressApp.post("/api/get_all_shop_items/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM \`shop_items\``, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -750,7 +750,7 @@ expressApp.post("/api/get_shop_item_params/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`SELECT * FROM \`shop_items\` WHERE \`id\`='${item_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -785,7 +785,7 @@ expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0');`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -808,7 +808,7 @@ expressApp.post("/api/update_shop_item/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role == "Администратор" || user.role == "Модератор") {
+      if (!!user&&!!user.role&&(user.role == "Администратор" || user.role == "Модератор")) {
         pool.query(`UPDATE \`shop_items\` SET \`cost\`=${mysql.escape(cost)}, \`title\`=${mysql.escape(title)}, \`description\`=${mysql.escape(description)}, \`deadline_take\`=${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(item_id)};`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)

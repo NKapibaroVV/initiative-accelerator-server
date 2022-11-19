@@ -24,7 +24,7 @@ const urlencodedParser = express.urlencoded({ extended: false });
 
 const tgBot = new telegramBot();
 
-SendServiceEmail.sendText({recipient:process.env.SERVICE_EMAIL!,subject:"Системное сообщение о запуске", text:`Выполнен запуск сервера в ${new Date().toLocaleString()}`})
+SendServiceEmail.sendText({ recipient: process.env.SERVICE_EMAIL!, subject: "Системное сообщение о запуске", text: `Выполнен запуск сервера в ${new Date().toLocaleString()}` })
 
 // Add headers before the routes are defined
 expressApp.use(function (req: any, res: any, next: any) {
@@ -58,19 +58,22 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
 expressApp.post('/api/reg/', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
-  pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(SHA512(password).toString())},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
-    if (err) {
-      res.send(err)
-    } else {
-      pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
-        if (err) {
-          res.send(err)
-        } else {
-          res.send(result)
-        }
-      });
-    }
-  });
+  let new_user_id: string = uuidv4();
+  addVerifCode(email, new_user_id).then(() => {
+    pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(SHA512(password).toString())},'${new_user_id}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
+      if (err) {
+        res.send(err)
+      } else {
+        pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err)
+          } else {
+            res.send(result)
+          }
+        });
+      }
+    });
+  })
 });
 
 expressApp.post("/api/get_user/", (req: any, res: any) => {
@@ -281,7 +284,7 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
         } else {
           let rank = result[0].rank;
           let count = result[0].count;
-          res.json({rank:Math.floor(((((rank*count)/5)*0.35)+(count/3|0)+count)*10)});
+          res.json({ rank: Math.floor(((((rank * count) / 5) * 0.35) + (count / 3 | 0) + count) * 10) });
         }
       })
     }
@@ -906,5 +909,20 @@ function addAdminLog(userId: string, message: string) {
       }
     })
   });
+}
+
+function addVerifCode(email: string, user_id: string) {
+  const code: string = uuidv4();
+
+  return new Promise(function (resolve, reject) {
+    pool.query(`INSERT INTO \`account_verif_codes\` (\`id\`,\`mail\`,\`code\`,\`user_id\`,\`activated\`) VALUES (${mysql.escape(uuidv4())},${mysql.escape(email)},${mysql.escape(code)}, ${mysql.escape(user_id)}, 0)`, function (err: any, result: any) {
+      if (err) {
+        reject(err);
+      } else {
+        SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Ваш код подтверждения: ${code}` })
+        resolve(code);
+      }
+    })
+  })
 
 }

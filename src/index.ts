@@ -243,7 +243,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
 
 
 expressApp.get("/api/get_global_rating/", (req: any, res: any) => {
-  pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 10`, function (err: any, result: any) {
+  pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 20`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {

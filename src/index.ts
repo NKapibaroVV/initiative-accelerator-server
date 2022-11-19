@@ -109,7 +109,7 @@ expressApp.post("/api/update_user/", (req: any, res: any) => {
     } else {
       let user = result[0];
 
-      if (user.role&&user.role == "Администратор") {
+      if (!!user&&!!user.role&&user.role == "Администратор") {
         pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`role\`=${mysql.escape(role)} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
@@ -132,7 +132,7 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role&&user.role == "Администратор") {
+      if (!!user&&!!user.role&&user.role == "Администратор") {
         let newPassword = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`
         pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape(SHA512(newPassword).toString())}, \`token\`=${mysql.escape(uuidv4())} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, res: any) {
           if (err) {
@@ -586,7 +586,7 @@ expressApp.post("/api/completely_delete_initiative/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      if (user.role&&user.role == "Администратор") {
+      if (!!user&&!!user.role&&user.role == "Администратор") {
         addAdminLog(user.id, `USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(() => {
           pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
             if (err) {

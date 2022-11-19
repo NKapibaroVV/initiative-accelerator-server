@@ -43,7 +43,7 @@ console.log(pool)
 
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {
@@ -51,6 +51,7 @@ expressApp.post('/api/auth/', (req: any, res: any) => {
     }
   })
 })
+
 expressApp.post('/api/reg/', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`

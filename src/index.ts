@@ -132,14 +132,23 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-
       if (user.role == "Администратор") {
         let newPassword = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`
-        pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape(SHA512(newPassword).toString())} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+        pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape(SHA512(newPassword).toString())} WHERE \`id\`='${user_id}'`, function (err: any, resultuser: any) {
           if (err) {
             res.send(err.message)
           } else {
-            res.send({ newPassword })
+            pool.query(`SELECT * FROM \`users\` WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+              if (err) {
+                res.send(err.message)
+              } else {
+                let client = resultuser[0];
+                res.send({ newPassword: "Отправлен на почту пользователя ()" })
+
+                SendServiceEmail.sendText({subject:"Восстановление пароля администратором",recipient:client.email,text:"Ваш новый пароль для входа: "+newPassword+"\n\nПароль сбросил администратор "+user.login})
+
+              }
+            })
           }
         })
       } else {

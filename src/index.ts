@@ -134,7 +134,7 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
       let user = result[0];
       if (!!user&&!!user.role&&user.role == "Администратор") {
         let newPassword = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`
-        pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape(SHA512(newPassword).toString())}, \`token\`=${mysql.escape(uuidv4())} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, res: any) {
+        pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape(SHA512(newPassword).toString())}, \`token\`=${mysql.escape(uuidv4())} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, reslt: any) {
           if (err) {
             res.send(err.message)
           } else {

@@ -83,9 +83,10 @@ expressApp.post('/api/email/verif', (req: any, res: any) => {
     if (err) {
       res.send(err);
     } else {
-      let newMail = result[0].mail;
-      let userId = result[0].user_id;
-      if (!!newMail&&!!userId) {
+
+      if (!!result && !!result[0] && !!result[0].mail) {
+        let newMail = result[0].mail;
+        let userId = result[0].user_id;
         pool.query(`UPDATE \`account_verif_codes\` SET \`activated\`=1 WHERE \`id\`=${mysql.escape(id)} AND \`code\`=${mysql.escape(code)}`, function (err: any, reslt: any) {
           if (err) {
             res.send(err);
@@ -94,15 +95,15 @@ expressApp.post('/api/email/verif', (req: any, res: any) => {
               if (err) {
                 res.send(err);
               } else {
-                res.send({msg:`Email ${newMail} подтверждён!`})
+                res.send({ msg: `Email ${newMail} подтверждён!` })
               }
             });
           }
         });
-      }else{
-        res.send({error:"wrong id/code"})
+      } else {
+        res.send({ error: "wrong id/code" })
       }
-      
+
     }
   });
 })

@@ -93,7 +93,7 @@ expressApp.post('/api/email/verif', (req: any, res: any) => {
             if (err) {
               res.send(err);
             } else {
-              res.send({message:`Email ${newMail} подтверждён!`})
+              res.send({msg:`Email ${newMail} подтверждён!`})
             }
           });
         }

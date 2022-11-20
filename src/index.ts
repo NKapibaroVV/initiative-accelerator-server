@@ -76,6 +76,32 @@ expressApp.post('/api/reg/', (req: any, res: any) => {
   })
 });
 
+expressApp.post('/api/email/verif', (req: any, res: any) => {
+  const { id, code } = req.body;
+
+  pool.query(`SELECT * FROM \`account_verif_codes\` WHERE \`id\`=${mysql.escape(id)} AND \`code\`=${mysql.escape(code)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err);
+    } else {
+      let newMail = result[0].mail;
+      let userId = result[0].user_id;
+      pool.query(`UPDATE \`account_verif_codes\` SET \`activated\`=1 WHERE \`id\`=${mysql.escape(id)} AND \`code\`=${mysql.escape(code)}`, function (err: any, reslt: any) {
+        if (err) {
+          res.send(err);
+        } else {
+          pool.query(`UPDATE \`users\` SET \`email\`=${mysql.escape(newMail)}, \`email_verified\`=1 WHERE \`id\`=${mysql.escape(userId)}`, function (err: any, reslt: any) {
+            if (err) {
+              res.send(err);
+            } else {
+              res.send({message:`Email ${newMail} подтверждён!`})
+            }
+          });
+        }
+      });
+    }
+  });
+})
+
 expressApp.post("/api/get_user/", (req: any, res: any) => {
   const { token, user_id } = req.body;
 
@@ -168,7 +194,7 @@ expressApp.post(`/api/get_all_users/`, (req: any, res: any) => {
       let user: any = result[0];
       let role: string = user.role;
 
-      if (!!role&&role == "Администратор" || role == "Модератор") {
+      if (!!role && role == "Администратор" || role == "Модератор") {
         pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`score\` DESC`, function (err: any, result: any) {
           if (err) {
             res.send(err)
@@ -190,7 +216,7 @@ expressApp.post(`/api/get_shop_item_stat/`, (req: any, res: any) => {
       let user: any = result[0];
       let role: string = user.role;
 
-      if (!!role&&role == "Администратор" || role == "Модератор") {
+      if (!!role && role == "Администратор" || role == "Модератор") {
         pool.query(`SELECT * from \`shop_logs\` JOIN \`users\` ON \`shop_logs\`.\`user_id\`=\`users\`.\`id\` WHERE \`shop_item_id\`=${mysql.escape(item_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err)
@@ -212,7 +238,7 @@ expressApp.post(`/api/award_user/`, (req: any, res: any) => {
       let user: any = result[0];
       let role: string = user.role;
 
-      if (!!role&&role == "Администратор" || role == "Модератор") {
+      if (!!role && role == "Администратор" || role == "Модератор") {
         pool.query(`SELECT \`income\` from \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err)

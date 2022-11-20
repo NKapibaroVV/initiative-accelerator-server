@@ -961,7 +961,7 @@ function addVerifCode(email: string, user_id: string, origin: string) {
       if (err) {
         reject(err);
       } else {
-        SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/${id}/${code}` })
+        SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/mail/verif/${id}/${code}` })
         resolve(code);
       }
     })

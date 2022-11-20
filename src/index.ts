@@ -59,7 +59,7 @@ expressApp.post('/api/reg/', (req: any, res: any) => {
   const { first_name, second_name, email, birth, password } = req.body;
   let login = `${email.split("@")[0]}_${uuidv4()}`
   let new_user_id: string = uuidv4();
-  addVerifCode(email, new_user_id).then(() => {
+  addVerifCode(email, new_user_id, req.get('origin')).then(() => {
     pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape(SHA512(password).toString())},'${new_user_id}', 'Студент',0,'${uuidv4()}')`, function (err: any, result: any) {
       if (err) {
         res.send(err)
@@ -953,15 +953,15 @@ function addAdminLog(userId: string, message: string) {
   });
 }
 
-function addVerifCode(email: string, user_id: string) {
+function addVerifCode(email: string, user_id: string, origin: string) {
   const code: string = uuidv4();
-
+  let id: string = uuidv4();
   return new Promise(function (resolve, reject) {
-    pool.query(`INSERT INTO \`account_verif_codes\` (\`id\`,\`mail\`,\`code\`,\`user_id\`,\`activated\`) VALUES (${mysql.escape(uuidv4())},${mysql.escape(email)},${mysql.escape(code)}, ${mysql.escape(user_id)}, 0)`, function (err: any, result: any) {
+    pool.query(`INSERT INTO \`account_verif_codes\` (\`id\`,\`mail\`,\`code\`,\`user_id\`,\`activated\`) VALUES (${mysql.escape(id)},${mysql.escape(email)},${mysql.escape(code)}, ${mysql.escape(user_id)}, 0)`, function (err: any, result: any) {
       if (err) {
         reject(err);
       } else {
-        SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Ваш код подтверждения: ${code}` })
+        SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/${id}/${code}` })
         resolve(code);
       }
     })

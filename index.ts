@@ -4,8 +4,8 @@ import e from "cors";
 import crypto, { SHA512 } from "crypto-js";
 import { Module } from "module";
 import { env } from "process";
-import { SendServiceEmail } from "./api/Mailer";
-import { telegramBot } from "./api/tgBot";
+import { SendServiceEmail } from "./src/Mailer";
+import { telegramBot } from "./src/tgBot";
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -942,7 +942,7 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
 })
 
 
-server.listen(process.env.PORT || 5000, () => {
+server.listen(5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
 
@@ -974,3 +974,4 @@ function addVerifCode(email: string, user_id: string, origin: string) {
   })
 
 }
+module.exports = expressApp;

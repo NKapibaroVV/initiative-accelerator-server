@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express');
 const axios_1 = __importDefault(require("axios"));
 const crypto_js_1 = require("crypto-js");
-const tgBot_1 = require("./tgBot");
+const Mailer_1 = require("./src/Mailer");
+const tgBot_1 = require("./src/tgBot");
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -23,6 +24,7 @@ const { v4: uuidv4 } = require('uuid');
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 const tgBot = new tgBot_1.telegramBot();
+Mailer_1.SendServiceEmail.sendText({ recipient: process.env.SERVICE_EMAIL, subject: "Системное сообщение о запуске", text: `Выполнен запуск сервера в ${new Date().toLocaleString()}` });
 // Add headers before the routes are defined
 expressApp.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -40,7 +42,7 @@ const pool = mysql.createPool({
 console.log(pool);
 expressApp.post('/api/auth/', (req, res) => {
     const { email, password } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
         if (err) {
             res.send(err);
         }
@@ -52,19 +54,54 @@ expressApp.post('/api/auth/', (req, res) => {
 expressApp.post('/api/reg/', (req, res) => {
     const { first_name, second_name, email, birth, password } = req.body;
     let login = `${email.split("@")[0]}_${uuidv4()}`;
-    pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape((0, crypto_js_1.SHA512)(password).toString())},'${uuidv4()}', 'Студент',0,'${uuidv4()}')`, function (err, result) {
+    let new_user_id = uuidv4();
+    addVerifCode(email, new_user_id, req.get('origin')).then(() => {
+        pool.query(`INSERT INTO \`users\` (\`birth\`, \`name\`,\`surname\`,\`email\`,\`login\`,\`password\`,\`id\`,\`role\`,\`score\`,\`token\`) VALUES (${mysql.escape(birth)},${mysql.escape(first_name)}, ${mysql.escape(second_name)}, ${mysql.escape(email)}, ${mysql.escape(login)}, ${mysql.escape((0, crypto_js_1.SHA512)(password).toString())},'${new_user_id}', 'Студент',0,'${uuidv4()}')`, function (err, result) {
+            if (err) {
+                res.send(err);
+            }
+            else {
+                pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err, result) {
+                    if (err) {
+                        res.send(err);
+                    }
+                    else {
+                        res.send(result);
+                    }
+                });
+            }
+        });
+    });
+});
+expressApp.post('/api/email/verif', (req, res) => {
+    const { id, code } = req.body;
+    pool.query(`SELECT * FROM \`account_verif_codes\` WHERE \`id\`=${mysql.escape(id)} AND \`code\`=${mysql.escape(code)}`, function (err, result) {
         if (err) {
             res.send(err);
         }
         else {
-            pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`name\`=${mysql.escape(first_name)} AND \`surname\`=${mysql.escape(second_name)} AND \`login\`=${mysql.escape(login)}`, function (err, result) {
-                if (err) {
-                    res.send(err);
-                }
-                else {
-                    res.send(result);
-                }
-            });
+            if (!!result && !!result[0] && !!result[0].mail) {
+                let newMail = result[0].mail;
+                let userId = result[0].user_id;
+                pool.query(`UPDATE \`account_verif_codes\` SET \`activated\`=1 WHERE \`id\`=${mysql.escape(id)} AND \`code\`=${mysql.escape(code)}`, function (err, reslt) {
+                    if (err) {
+                        res.send(err);
+                    }
+                    else {
+                        pool.query(`UPDATE \`users\` SET \`email\`=${mysql.escape(newMail)}, \`email_verified\`=1 WHERE \`id\`=${mysql.escape(userId)}`, function (err, reslt) {
+                            if (err) {
+                                res.send(err);
+                            }
+                            else {
+                                res.send({ msg: `Email ${newMail} подтверждён!` });
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                res.send({ error: "wrong id/code" });
+            }
         }
     });
 });
@@ -76,7 +113,7 @@ expressApp.post("/api/get_user/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -100,7 +137,7 @@ expressApp.post("/api/update_user/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор") {
+            if (!!user && !!user.role && user.role == "Администратор") {
                 pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`role\`=${mysql.escape(role)} WHERE \`id\`='${user_id}'`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -124,14 +161,25 @@ expressApp.post("/api/reset_user_password/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор") {
+            if (!!user && !!user.role && user.role == "Администратор") {
                 let newPassword = `${uuidv4().split("-")[0]}-${uuidv4().split("-")[1]}-${uuidv4().split("-")[0]}`;
-                pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(newPassword).toString())} WHERE \`id\`='${user_id}'`, function (err, result) {
+                pool.query(`UPDATE \`users\` SET \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(newPassword).toString())}, \`token\`=${mysql.escape(uuidv4())} WHERE \`id\`=${mysql.escape(user_id)}`, function (err, reslt) {
                     if (err) {
                         res.send(err.message);
                     }
                     else {
-                        res.send({ newPassword });
+                        pool.query(`SELECT \`email\` FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err, resultuser) {
+                            if (err) {
+                                res.send(err.message);
+                            }
+                            else {
+                                let client = resultuser[0];
+                                addAdminLog(user.id, `USER PASSWORD RESETED {"user_id":"${client.id}"}`).then(() => {
+                                    res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
+                                    Mailer_1.SendServiceEmail.sendText({ subject: "Восстановление пароля администратором", recipient: client.email, text: "Ваш новый пароль для входа: " + newPassword + "\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор " + user.login });
+                                });
+                            }
+                        });
                     }
                 });
             }
@@ -150,8 +198,8 @@ expressApp.post(`/api/get_all_users/`, (req, res) => {
         else {
             let user = result[0];
             let role = user.role;
-            if (role == "Администратор" || role == "Модератор") {
-                pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`surname\` ASC`, function (err, result) {
+            if (!!role && role == "Администратор" || role == "Модератор") {
+                pool.query(`SELECT * from \`users\` WHERE 1 ORDER BY \`score\` DESC`, function (err, result) {
                     if (err) {
                         res.send(err);
                     }
@@ -172,7 +220,7 @@ expressApp.post(`/api/get_shop_item_stat/`, (req, res) => {
         else {
             let user = result[0];
             let role = user.role;
-            if (role == "Администратор" || role == "Модератор") {
+            if (!!role && role == "Администратор" || role == "Модератор") {
                 pool.query(`SELECT * from \`shop_logs\` JOIN \`users\` ON \`shop_logs\`.\`user_id\`=\`users\`.\`id\` WHERE \`shop_item_id\`=${mysql.escape(item_id)}`, function (err, result) {
                     if (err) {
                         res.send(err);
@@ -194,7 +242,7 @@ expressApp.post(`/api/award_user/`, (req, res) => {
         else {
             let user = result[0];
             let role = user.role;
-            if (role == "Администратор" || role == "Модератор") {
+            if (!!role && role == "Администратор" || role == "Модератор") {
                 pool.query(`SELECT \`income\` from \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err, result) {
                     if (err) {
                         res.send(err);
@@ -225,7 +273,7 @@ expressApp.post(`/api/award_user/`, (req, res) => {
     });
 });
 expressApp.get("/api/get_global_rating/", (req, res) => {
-    pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 10`, function (err, result) {
+    pool.query(`SELECT DISTINCT \`score\` FROM \`users\` ORDER BY \`score\` DESC LIMIT 20`, function (err, result) {
         if (err) {
             res.send(err.message);
         }
@@ -368,40 +416,45 @@ expressApp.post("/api/get_initiatives/", (req, res) => {
 });
 expressApp.post("/api/start_initiative/", (req, res) => {
     const { token, initiative_id } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`token\`=${mysql.escape(token)}`, function (err, result) {
         if (err) {
             res.send(err.message);
         }
         else {
             let user = result[0];
-            pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err, result) {
-                if (err) {
-                    res.send(err.message);
-                }
-                else {
-                    let initiative = result[0];
-                    if (initiative.users_limit == null || initiative.users_limit > initiative.users_taken) {
-                        pool.query(`INSERT INTO \`initiatives_taken\` (\`identifer\`,\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(`${user.id}_${initiative_id}`)},${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err, result) {
-                            if (err) {
-                                res.send(err.message);
-                            }
-                            else {
-                                pool.query(`UPDATE \`initiatives\` SET \`users_taken\`=\`users_taken\`+1 WHERE \`id\`='${initiative_id}'`, function (err, result) {
-                                    if (err) {
-                                        res.send(err.message);
-                                    }
-                                    else {
-                                        res.send("Вы успешно приступили к выполнению задания!");
-                                    }
-                                });
-                            }
-                        });
+            if (!!user && !!user.id) {
+                pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err, result) {
+                    if (err) {
+                        res.send(err.message);
                     }
                     else {
-                        res.send("Достигнуто ограничение на кол-во мест!");
+                        let initiative = result[0];
+                        if (initiative.users_limit == null || initiative.users_limit > initiative.users_taken) {
+                            pool.query(`INSERT INTO \`initiatives_taken\` (\`identifer\`,\`initiative_id\`,\`user_id\`) VALUES (${mysql.escape(`${user.id}_${initiative_id}`)},${mysql.escape(initiative_id)},${mysql.escape(user.id)})`, function (err, result) {
+                                if (err) {
+                                    res.send(err.message);
+                                }
+                                else {
+                                    pool.query(`UPDATE \`initiatives\` SET \`users_taken\`=\`users_taken\`+1 WHERE \`id\`='${initiative_id}'`, function (err, result) {
+                                        if (err) {
+                                            res.send(err.message);
+                                        }
+                                        else {
+                                            res.send("Вы успешно приступили к выполнению задания!");
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            res.send("Достигнуто ограничение на кол-во мест!");
+                        }
                     }
-                }
-            });
+                });
+            }
+            else {
+                res.send({ error: "email не подтверждён!" });
+            }
         }
     });
 });
@@ -432,7 +485,7 @@ expressApp.post("/api/get_initiatives_results/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT DISTINCT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` WHERE \`checked\`=0 GROUP BY \`initiative_id\``, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -456,7 +509,7 @@ expressApp.post("/api/get_initiative_results/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM \`initiatives_completed\` JOIN \`initiatives\` on \`id\`=\`initiative_id\` JOIN \`users\` on \`user_id\`=\`users\`.\`id\` WHERE \`initiative_id\`='${initiative_id}' AND \`checked\`=0`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -481,7 +534,7 @@ expressApp.post("/api/add_initiative/", (req, res) => {
         else {
             let user = result[0];
             let initiative_identifer = uuidv4();
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`;
                 (0, axios_1.default)(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
                     console.log(response.data);
@@ -550,7 +603,7 @@ expressApp.post("/api/update_initiative/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`UPDATE \`initiatives\`  SET  \`category\`=${mysql.escape(category)}, \`title\`=${mysql.escape(title)}, \`content\`=${mysql.escape(content)}, \`income\`=${mysql.escape(income)}, \`deadline_take\`=${mysql.escape(take_deadline)}, \`deadline_complete\`=${mysql.escape(complete_deadline)}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -574,7 +627,7 @@ expressApp.post("/api/completely_delete_initiative/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор") {
+            if (!!user && !!user.role && user.role == "Администратор") {
                 addAdminLog(user.id, `USER DELETED INITIATIVE {'id':'${initiative_id}}'}`).then(() => {
                     pool.query(`DELETE FROM \`initiatives\` WHERE \`id\`=${mysql.escape(initiative_id)}`, function (err, result) {
                         if (err) {
@@ -621,7 +674,7 @@ expressApp.post("/api/get_all_initiatives/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM  \`initiatives\``, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -645,7 +698,7 @@ expressApp.post("/api/get_initiative_params/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM \`initiatives\` WHERE \`id\`='${initiative_id}'`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -671,7 +724,7 @@ expressApp.post("/api/get_initiative_members/", (req, res) => {
             let user = result[0];
             let taken = [];
             let completed = [];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM initiatives_taken INNER JOIN initiatives on initiatives_taken.initiative_id=initiatives.id INNER JOIN users ON users.id=initiatives_taken.user_id WHERE initiatives_taken.initiative_id=${mysql.escape(initiative_id)}`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -719,7 +772,7 @@ expressApp.post("/api/get_all_shop_items/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM \`shop_items\``, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -743,7 +796,7 @@ expressApp.post("/api/get_shop_item_params/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`SELECT * FROM \`shop_items\` WHERE \`id\`='${item_id}'`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -778,7 +831,7 @@ expressApp.post("/api/add_shop_item/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0');`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -802,7 +855,7 @@ expressApp.post("/api/update_shop_item/", (req, res) => {
         }
         else {
             let user = result[0];
-            if (user.role == "Администратор" || user.role == "Модератор") {
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 pool.query(`UPDATE \`shop_items\` SET \`cost\`=${mysql.escape(cost)}, \`title\`=${mysql.escape(title)}, \`description\`=${mysql.escape(description)}, \`deadline_take\`=${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, \`users_limit\`=${!!users_limit ? mysql.escape(users_limit) : "NULL"} WHERE \`id\`=${mysql.escape(item_id)};`, function (err, result) {
                     if (err) {
                         res.send(err.message);
@@ -900,7 +953,7 @@ expressApp.post("/api/get_my_shop_logs/", (req, res) => {
         }
     });
 });
-server.listen(process.env.PORT || 5000, () => {
+server.listen(5000, () => {
     console.log(`listening on *:${process.env.PORT || 5000}`);
 });
 function addAdminLog(userId, message) {
@@ -915,3 +968,19 @@ function addAdminLog(userId, message) {
         });
     });
 }
+function addVerifCode(email, user_id, origin) {
+    const code = uuidv4();
+    let id = uuidv4();
+    return new Promise(function (resolve, reject) {
+        pool.query(`INSERT INTO \`account_verif_codes\` (\`id\`,\`mail\`,\`code\`,\`user_id\`,\`activated\`) VALUES (${mysql.escape(id)},${mysql.escape(email)},${mysql.escape(code)}, ${mysql.escape(user_id)}, 0)`, function (err, result) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                Mailer_1.SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/mail/verif/${id}/${code}` });
+                resolve(code);
+            }
+        });
+    });
+}
+module.exports = expressApp;

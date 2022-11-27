@@ -948,8 +948,6 @@ server.listen(process.env.PORT || 3000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
 
-module.exports = server;
-
 function addAdminLog(userId: string, message: string) {
   return new Promise(function (resolve, reject) {
     pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${new Date().getTime()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err: any, result: any) {

@@ -9,9 +9,10 @@
   "main": "bild/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build",
+    "start": "npm run index.js",
     "dev": "npm run build && nodemon app/index.js",
-    "build": "tsc --outDir ./"
+    "build": "tsc --outDir app",
+    "vercel-build": "tsc --outDir ./"
   },
   "keywords": [],
   "author": "",

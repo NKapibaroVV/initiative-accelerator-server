@@ -2,10 +2,9 @@ const express = require('express');
 import axios from "axios";
 import e from "cors";
 import crypto, { SHA512 } from "crypto-js";
-import { Module } from "module";
 import { env } from "process";
-import { SendServiceEmail } from "./src/Mailer";
-import { telegramBot } from "./src/tgBot";
+import { SendServiceEmail } from "./Mailer";
+import { telegramBot } from "./tgBot";
 const path = require('path');
 const expressApp = express();
 const http = require('http');
@@ -942,7 +941,7 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
 })
 
 
-server.listen(5000, () => {
+server.listen(process.env.PORT || 5000, () => {
   console.log(`listening on *:${process.env.PORT || 5000}`);
 });
 
@@ -957,7 +956,6 @@ function addAdminLog(userId: string, message: string) {
     })
   });
 }
-
 
 function addVerifCode(email: string, user_id: string, origin: string) {
   const code: string = uuidv4();
@@ -974,4 +972,3 @@ function addVerifCode(email: string, user_id: string, origin: string) {
   })
 
 }
-module.exports = expressApp;

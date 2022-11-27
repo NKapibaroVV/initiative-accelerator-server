@@ -45,7 +45,7 @@ const pool = mysql.createPool({
 console.log(pool)
 
 expressApp.get('/api/', (req: any, res: any) => {
-  res.send("api")
+  res.send("api");
 })
 
 expressApp.post('/api/auth/', (req: any, res: any) => {

@@ -8,9 +8,7 @@
   "homepage": "/",
   "main": "bild/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "tsc --outDir app && nodemon app/index.js",
     "build": "tsc --outDir ./"
   },
   "keywords": [],

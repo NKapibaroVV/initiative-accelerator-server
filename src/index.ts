@@ -44,6 +44,10 @@ const pool = mysql.createPool({
 
 console.log(pool)
 
+expressApp.get('/api/', (req: any, res: any) => {
+  res.send("api")
+})
+
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {

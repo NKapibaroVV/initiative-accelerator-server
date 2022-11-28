@@ -827,7 +827,7 @@ expressApp.post("/api/get_personal_rating/", (req, res) => {
     });
 });
 expressApp.post("/api/add_shop_item/", (req, res) => {
-    const { token, cost, title, description, deadline_take, users_limit } = req.body;
+    const { token, cost, title, description, deadline_take, users_limit, user_id } = req.body;
     pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
         if (err) {
             res.send(err.message);
@@ -835,7 +835,7 @@ expressApp.post("/api/add_shop_item/", (req, res) => {
         else {
             let user = result[0];
             if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
-                pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0');`, function (err, result) {
+                pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`, \`user_id\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0', ${!!user_id ? mysql.escape(user_id) : "NULL"});`, function (err, result) {
                     if (err) {
                         res.send(err.message);
                     }
@@ -874,14 +874,23 @@ expressApp.post("/api/update_shop_item/", (req, res) => {
         }
     });
 });
-expressApp.get("/api/get_shop_items/", (req, res) => {
+expressApp.post("/api/get_shop_items/", (req, res) => {
+    const { token } = req.body;
     let now = new Date().getTime();
-    pool.query(`SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\``, function (err, result) {
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
         if (err) {
             res.send(err.message);
         }
         else {
-            res.send(result);
+            let user = result[0];
+            pool.query(`SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\` AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\` AND \`user_id\`=${mysql.escape(user.id)}`, function (err, result) {
+                if (err) {
+                    res.send(err.message);
+                }
+                else {
+                    res.send(result);
+                }
+            });
         }
     });
 });

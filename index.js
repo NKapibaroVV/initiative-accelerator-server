@@ -45,7 +45,7 @@ expressApp.get('/', (req, res) => {
 });
 expressApp.post('/api/auth/', (req, res) => {
     const { email, password } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
+    pool.query(`SELECT * FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
         if (err) {
             res.send(err);
         }
@@ -165,7 +165,7 @@ expressApp.post("/api/editScoreByDeltaScore/", (req, res) => {
         else {
             let user = result[0];
             if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
-                pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} WHERE \`id\`=${mysql.escape(user_id)}`, function (err, result) {
+                pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)}, \`notifs_checked\`=0 WHERE \`id\`=${mysql.escape(user_id)}`, function (err, result) {
                     if (err) {
                         res.send(err.message);
                     }
@@ -196,6 +196,25 @@ expressApp.post("/api/getNotifs/", (req, res) => {
         else {
             let user = result[0];
             pool.query(`SELECT * FROM \`notifications\` WHERE \`user\`='${user.id}' OR \`user\` is NULL ORDER BY \`time\` ASC`, function (err, result) {
+                if (err) {
+                    res.send(err.message);
+                }
+                else {
+                    res.send(result);
+                }
+            });
+        }
+    });
+});
+expressApp.post("/api/checkNotifs/", (req, res) => {
+    const { token } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            pool.query(`UPDATE \`users\` SET \`notifs_checked\`=1 WHERE \`id\`=${mysql.escape(user.id)}`, function (err, result) {
                 if (err) {
                     res.send(err.message);
                 }

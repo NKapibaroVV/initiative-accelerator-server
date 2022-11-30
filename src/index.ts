@@ -50,7 +50,7 @@ expressApp.get('/', (req: any, res: any) => {
 
 expressApp.post('/api/auth/', (req: any, res: any) => {
   const { email, password } = req.body;
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {
+  pool.query(`SELECT * FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape(SHA512(password).toString())}`, function (err: any, result: any) {
     if (err) {
       res.send(err)
     } else {
@@ -170,7 +170,7 @@ expressApp.post("/api/editScoreByDeltaScore/", (req: any, res: any) => {
       let user = result[0];
 
       if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
-        pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+        pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)}, \`notifs_checked\`=0 WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -200,6 +200,26 @@ expressApp.post("/api/getNotifs/", (req: any, res: any) => {
       let user = result[0];
 
       pool.query(`SELECT * FROM \`notifications\` WHERE \`user\`='${user.id}' OR \`user\` is NULL ORDER BY \`time\` ASC`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result);
+        }
+      })
+    }
+  })
+})
+
+expressApp.post("/api/checkNotifs/", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      pool.query(`UPDATE \`users\` SET \`notifs_checked\`=1 WHERE \`id\`=${mysql.escape(user.id)}`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
         } else {

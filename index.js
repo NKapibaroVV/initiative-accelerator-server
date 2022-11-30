@@ -132,6 +132,80 @@ expressApp.post("/api/get_user/", (req, res) => {
         }
     });
 });
+expressApp.post("/api/get_user/", (req, res) => {
+    const { token, user_id } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
+                pool.query(`SELECT * FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err, result) {
+                    if (err) {
+                        res.send(err.message);
+                    }
+                    else {
+                        res.send(result);
+                    }
+                });
+            }
+            else {
+                res.send();
+            }
+        }
+    });
+});
+expressApp.post("/api/editScoreByDeltaScore/", (req, res) => {
+    const { token, user_id, cost_delta, cost_delta_comment, action } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
+                pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} WHERE \`id\`=${mysql.escape(user_id)}`, function (err, result) {
+                    if (err) {
+                        res.send(err.message);
+                    }
+                    else {
+                        pool.query(`INSERT INTO \`notifications\` (\`time\`, \`title\`,\`text\`,\`user\`) VALUES (${Date.now()}, "${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} баллов", ${mysql.escape(cost_delta_comment)}, ${mysql.escape(user_id)})`, function (err, result) {
+                            if (err) {
+                                res.send(err.message);
+                            }
+                            else {
+                                res.send(result);
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                res.send();
+            }
+        }
+    });
+});
+expressApp.post("/api/getNotifs/", (req, res) => {
+    const { token } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            pool.query(`SELECT * FROM \`notifications\` WHERE \`user\`='${user.id}' OR \`user\` is NULL ORDER BY \`time\` ASC`, function (err, result) {
+                if (err) {
+                    res.send(err.message);
+                }
+                else {
+                    res.send(result);
+                }
+            });
+        }
+    });
+});
 expressApp.post("/api/update_user/", (req, res) => {
     const { token, user_id, name, surname, email, edu_group, birth, role } = req.body;
     pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
@@ -405,7 +479,7 @@ expressApp.post("/api/get_initiatives/", (req, res) => {
             res.send(err.message);
         }
         else {
-            let now = new Date().getTime();
+            let now = Date.now();
             pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`, function (err, result) {
                 if (err) {
                     res.send(err.message);
@@ -876,7 +950,7 @@ expressApp.post("/api/update_shop_item/", (req, res) => {
 });
 expressApp.post("/api/get_shop_items/", (req, res) => {
     const { token } = req.body;
-    let now = new Date().getTime();
+    let now = Date.now();
     pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
         if (err) {
             res.send(err.message);
@@ -908,7 +982,7 @@ expressApp.post("/api/buy_shop_item/", (req, res) => {
                 }
                 else {
                     let shopItem = result[0];
-                    let now = new Date().getTime();
+                    let now = Date.now();
                     if (user.score - shopItem.cost >= 0) {
                         if (shopItem.users_limit == null || shopItem.users_taken < shopItem.users_limit) {
                             pool.query(`INSERT INTO \`shop_logs\` (\`identifer\`, \`shop_item_id\`,\`user_id\`,\`time\`) VALUES (NULL, ${mysql.escape(shop_item_id)}, '${user.id}', ${now})`, function (err, result) {
@@ -970,7 +1044,7 @@ server.listen(process.env.PORT || 3000, () => {
 });
 function addAdminLog(userId, message) {
     return new Promise(function (resolve, reject) {
-        pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${new Date().getTime()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err, result) {
+        pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${Date.now()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err, result) {
             if (err) {
                 reject(err);
             }

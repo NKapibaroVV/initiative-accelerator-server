@@ -136,6 +136,80 @@ expressApp.post("/api/get_user/", (req: any, res: any) => {
   })
 })
 
+expressApp.post("/api/get_user/", (req: any, res: any) => {
+  const { token, user_id } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
+        pool.query(`SELECT * FROM \`users\` WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            res.send(result)
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
+expressApp.post("/api/editScoreByDeltaScore/", (req: any, res: any) => {
+  const { token, user_id, cost_delta, cost_delta_comment, action } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
+        pool.query(`UPDATE \`users\` SET \`score\`=\`score\`${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} WHERE \`id\`=${mysql.escape(user_id)}`, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            pool.query(`INSERT INTO \`notifications\` (\`time\`, \`title\`,\`text\`,\`user\`) VALUES (${Date.now()}, "${action == "add" ? "+" : "-"}${mysql.escape(cost_delta)} баллов", ${mysql.escape(cost_delta_comment)}, ${mysql.escape(user_id)})`, function (err: any, result: any) {
+              if (err) {
+                res.send(err.message)
+              } else {
+                res.send(result)
+              }
+            })
+          }
+        })
+      } else {
+        res.send()
+      }
+    }
+  })
+})
+
+expressApp.post("/api/getNotifs/", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+
+      pool.query(`SELECT * FROM \`notifications\` WHERE \`user\`='${user.id}' OR \`user\` is NULL ORDER BY \`time\` ASC`, function (err: any, result: any) {
+        if (err) {
+          res.send(err.message)
+        } else {
+          res.send(result);
+        }
+      })
+    }
+  })
+})
+
 expressApp.post("/api/update_user/", (req: any, res: any) => {
   const { token, user_id, name, surname, email, edu_group, birth, role } = req.body;
 
@@ -407,7 +481,7 @@ expressApp.post("/api/get_initiatives/", (req: any, res: any) => {
     if (err) {
       res.send(err.message)
     } else {
-      let now = new Date().getTime();
+      let now = Date.now();
       pool.query(`SELECT * FROM \`initiatives\` WHERE deadline_take>${now} AND users_limit>users_taken union SELECT * from \`initiatives\` WHERE deadline_take>${now} AND users_limit IS NULL`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
@@ -452,8 +526,8 @@ expressApp.post("/api/start_initiative/", (req: any, res: any) => {
             }
           }
         })
-      }else{
-        res.send({error:"email не подтверждён!"})
+      } else {
+        res.send({ error: "email не подтверждён!" })
       }
     }
   })
@@ -827,7 +901,7 @@ expressApp.post("/api/add_shop_item/", (req: any, res: any) => {
     } else {
       let user = result[0];
       if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
-        pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`, \`user_id\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0', ${!!user_id?mysql.escape(user_id):"NULL"});`, function (err: any, result: any) {
+        pool.query(`INSERT INTO \`shop_items\` (\`id\`, \`cost\`, \`title\`, \`description\`, \`deadline_take\`, \`users_limit\`, \`users_taken\`, \`user_id\`) VALUES (NULL, ${mysql.escape(cost)}, ${mysql.escape(title)}, ${mysql.escape(description)}, ${!!deadline_take ? mysql.escape(deadline_take) : "NULL"}, ${!!users_limit ? mysql.escape(users_limit) : "NULL"}, '0', ${!!user_id ? mysql.escape(user_id) : "NULL"});`, function (err: any, result: any) {
           if (err) {
             res.send(err.message)
           } else {
@@ -866,14 +940,14 @@ expressApp.post("/api/update_shop_item/", (req: any, res: any) => {
 
 expressApp.post("/api/get_shop_items/", (req: any, res: any) => {
   const { token } = req.body;
-  let now = new Date().getTime()
+  let now = Date.now()
 
   pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
       let user = result[0];
-      
+
       pool.query(`SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\` AND \`user_id\` is NULL UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\`>\`users_taken\` AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\` IS NULL AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\` IS NULL AND \`users_limit\` IS NULL AND \`user_id\`=${mysql.escape(user.id)} UNION SELECT * FROM \`shop_items\` WHERE \`deadline_take\`>${now} AND \`users_limit\`>\`users_taken\` AND \`user_id\`=${mysql.escape(user.id)}`, function (err: any, result: any) {
         if (err) {
           res.send(err.message)
@@ -884,7 +958,7 @@ expressApp.post("/api/get_shop_items/", (req: any, res: any) => {
     }
   })
 
-  
+
 }
 )
 
@@ -901,7 +975,7 @@ expressApp.post("/api/buy_shop_item/", (req: any, res: any) => {
           res.send(err.message)
         } else {
           let shopItem = result[0];
-          let now = new Date().getTime();
+          let now = Date.now();
 
           if (user.score - shopItem.cost >= 0) {
             if (shopItem.users_limit == null || shopItem.users_taken < shopItem.users_limit) {
@@ -962,7 +1036,7 @@ server.listen(process.env.PORT || 3000, () => {
 
 function addAdminLog(userId: string, message: string) {
   return new Promise(function (resolve, reject) {
-    pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${new Date().getTime()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err: any, result: any) {
+    pool.query(`INSERT INTO admin_logs (\`id\`, \`time\`,\`user\`,\`message\`) VALUES ('${uuidv4()}','${Date.now()}', ${mysql.escape(userId)}, ${mysql.escape(message)})`, function (err: any, result: any) {
       if (err) {
         reject(err);
       } else {

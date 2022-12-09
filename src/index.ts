@@ -1098,10 +1098,10 @@ expressApp.post("/api/getBigInitiativesStatistics", (req: any, res: any) => {
                         = result;
             let rows:string[] = ["Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n"];
             resultObj.forEach((resp:response) => {
-              rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`];
+              rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}`.replace(",","(_z_)")];
             });
             res.header("Content-Type","text/csv");
-            res.send(rows.toString())
+            res.send(rows.toString().replace(",",'\n').replace("(_z_)",","))
           }
         })
       }

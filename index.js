@@ -1089,12 +1089,12 @@ expressApp.post("/api/getBigInitiativesStatistics", (req, res) => {
                     }
                     else {
                         let resultObj = result;
-                        let rows = ["Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n"];
+                        let rows = "Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n";
                         resultObj.forEach((resp) => {
-                            rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}`.replace(",", "(_z_)")];
+                            rows = `${rows}${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`;
                         });
                         res.header("Content-Type", "text/csv");
-                        res.send(rows.toString().replace(",", '\n').replace("(_z_)", ","));
+                        res.send(rows);
                     }
                 });
             }

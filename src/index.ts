@@ -1066,6 +1066,51 @@ function addAdminLog(userId: string, message: string) {
   });
 }
 
+expressApp.post("/api/getBigInitiativesStatistics", (req: any, res: any) => {
+  const { token } = req.body;
+
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+    if (err) {
+      res.send(err.message)
+    } else {
+      let user = result[0];
+      if (!!user && !!user.role && (user.role == "Администратор")) {
+        const sqlRequest = "SELECT * FROM (SELECT id as i_id,category,title, deadline_complete, users_limit, users_taken FROM `initiatives`) as initiatives_tbl INNER JOIN `initiatives_completed` on `initiatives_tbl`.`i_id`=`initiatives_completed`.`initiative_id` INNER JOIN (SELECT id as u_id, name, surname, email, score FROM `users`) as users_tbl ON `initiatives_completed`.`user_id`=`users_tbl`.`u_id`;";
+        pool.query(sqlRequest, function (err: any, result: any) {
+          if (err) {
+            res.send(err.message)
+          } else {
+            interface response{
+              i_id:string,
+              category:string, 
+              title:string,
+              deadline_complete:string,
+              users_limit:number|null,
+              users_taken:number,
+              user_id:string,checked:1|0,
+              u_id:string,
+              name:string,
+              surname:string,
+              email:string,
+              score:string
+            }
+            let resultObj:response[]
+                        = result;
+            let rows:string[] = ["Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n"];
+            resultObj.forEach((resp:response) => {
+              rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`];
+            });
+
+            res.send(resultObj.toString())
+          }
+        })
+      }
+
+      
+    }
+  })
+})
+
 
 function addVerifCode(email: string, user_id: string, origin: string) {
   const code: string = uuidv4();

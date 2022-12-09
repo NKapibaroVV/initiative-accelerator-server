@@ -1100,7 +1100,6 @@ expressApp.post("/api/getBigInitiativesStatistics", (req: any, res: any) => {
             resultObj.forEach((resp:response) => {
               rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`];
             });
-
             res.send(rows.toString())
           }
         })

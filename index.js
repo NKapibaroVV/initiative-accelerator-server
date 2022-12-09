@@ -1073,6 +1073,33 @@ function addAdminLog(userId, message) {
         });
     });
 }
+expressApp.post("/api/getBigInitiativesStatistics", (req, res) => {
+    const { token } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            if (!!user && !!user.role && (user.role == "Администратор")) {
+                const sqlRequest = "SELECT * FROM (SELECT id as i_id,category,title, deadline_complete, users_limit, users_taken FROM `initiatives`) as initiatives_tbl INNER JOIN `initiatives_completed` on `initiatives_tbl`.`i_id`=`initiatives_completed`.`initiative_id` INNER JOIN (SELECT id as u_id, name, surname, email, score FROM `users`) as users_tbl ON `initiatives_completed`.`user_id`=`users_tbl`.`u_id`;";
+                pool.query(sqlRequest, function (err, result) {
+                    if (err) {
+                        res.send(err.message);
+                    }
+                    else {
+                        let resultObj = result;
+                        let rows = ["Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n"];
+                        resultObj.forEach((resp) => {
+                            rows = [...rows, `${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`];
+                        });
+                        res.send(resultObj.toString());
+                    }
+                });
+            }
+        }
+    });
+});
 function addVerifCode(email, user_id, origin) {
     const code = uuidv4();
     let id = uuidv4();

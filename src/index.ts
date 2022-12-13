@@ -272,9 +272,8 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
               } else {
                 let client = resultuser[0];
                 addAdminLog(user.id, `USER PASSWORD RESETED {"user_id":"${client.id}"}`).then(() => {
-                  res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` })
-
                   SendServiceEmail.sendText({ subject: "Восстановление пароля администратором", recipient: client.email, text: "Ваш новый пароль для входа: " + newPassword + "\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор " + user.login })
+                  res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
                 })
               }
             })
@@ -1049,7 +1048,7 @@ expressApp.post("/api/get_my_shop_logs/", (req: any, res: any) => {
 
 
 server.listen(process.env.PORT || 3000, () => {
-  console.log(`listening on *:${process.env.PORT || 5000}`);
+  console.log(`listening on *:${process.env.PORT || 3000}`);
 });
 
 function addAdminLog(userId: string, message: string) {

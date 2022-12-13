@@ -631,7 +631,7 @@ expressApp.post("/api/add_initiative/", (req: any, res: any) => {
       let initiative_identifer = uuidv4();
       if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
         let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`
-        axios(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${vk_token}&v=5.131`).then(response => {
+        axios(`https://api.vk.com/method/messages.createChat?title=${encodeURI(chatName)}&access_token=${vk_token}&v=5.131`).then(response => {
           console.log(response.data)
           let chatId = response.data.response
           axios(`https://api.vk.com/method/messages.getInviteLink?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${vk_token}&v=5.131`).then(response => {

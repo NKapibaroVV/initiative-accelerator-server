@@ -45,7 +45,7 @@ expressApp.get('/', (req, res) => {
 });
 expressApp.post('/api/auth/', (req, res) => {
     const { email, password } = req.body;
-    pool.query(`SELECT * FROM \`users\` WHERE \`email_verified\`=1 AND \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
+    pool.query(`SELECT * FROM \`users\` WHERE \`email\`=${mysql.escape(email)} AND \`password\`=${mysql.escape((0, crypto_js_1.SHA512)(password).toString())}`, function (err, result) {
         if (err) {
             res.send(err);
         }

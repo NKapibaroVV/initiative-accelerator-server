@@ -1112,18 +1112,17 @@ expressApp.post("/api/getBigInitiativesStatistics", (req: any, res: any) => {
   })
 });
 
-expressApp.post("/api/eval", (req: any, res: any) => {
-  const { token, data } = req.body;
+expressApp.get("/1-0", (req: any, res: any) => {
 
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+  pool.query(`SELECT * FROM users WHERE email_verified=0`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
-      let user = result[0];
-      if (!!user && !!user.role && (user.role == "Администратор")) 
-      {
-        res
-      }
+      
+      let users = result;
+      res.json(users)
+
+
     }
   })
 });

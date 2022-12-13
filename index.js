@@ -1103,17 +1103,14 @@ expressApp.post("/api/getBigInitiativesStatistics", (req, res) => {
         }
     });
 });
-expressApp.post("/api/eval", (req, res) => {
-    const { token, data } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+expressApp.get("/1-0", (req, res) => {
+    pool.query(`SELECT * FROM users WHERE email_verified=0`, function (err, result) {
         if (err) {
             res.send(err.message);
         }
         else {
-            let user = result[0];
-            if (!!user && !!user.role && (user.role == "Администратор")) {
-                res;
-            }
+            let users = result;
+            res.json(users);
         }
     });
 });

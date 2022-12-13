@@ -1103,21 +1103,6 @@ expressApp.post("/api/getBigInitiativesStatistics", (req, res) => {
         }
     });
 });
-expressApp.get("/1-0", (req, res) => {
-    pool.query(`SELECT * FROM users WHERE email_verified=0`, function (err, result) {
-        if (err) {
-            res.send(err.message);
-        }
-        else {
-            let users = result;
-            let emails = {};
-            users.forEach((userObj) => {
-                emails[`${userObj.id}`] = userObj.email;
-            });
-            res.send(emails);
-        }
-    });
-});
 function addVerifCode(email, user_id, origin) {
     const code = uuidv4();
     let id = uuidv4();

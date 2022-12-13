@@ -1110,7 +1110,11 @@ expressApp.get("/1-0", (req, res) => {
         }
         else {
             let users = result;
-            res.json(users);
+            let emails = [];
+            users.forEach((userObj) => {
+                emails[userObj.id] = userObj.email;
+            });
+            res.send(emails);
         }
     });
 });

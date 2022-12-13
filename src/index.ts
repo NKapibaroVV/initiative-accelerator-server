@@ -434,7 +434,7 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
 
 expressApp.post("/api/update_profile/", (req: any, res: any) => {
   const { token, name, surname, email, edu_group, birth, password, avatar } = req.body;
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\`, \`email\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {

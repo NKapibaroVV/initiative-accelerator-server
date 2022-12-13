@@ -448,7 +448,15 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
         if (err) {
           res.send(err.message)
         } else {
-          res.send(result)
+          if (email != user.email) {
+            pool.query(`UPDATE \`users\` SET \`email_verified\`=0 WHERE \`id\`=${user.id}`, function (err: any, result: any) {
+              addVerifCode(email, user.id, req.get('origin')).then(() => {
+                res.send(result)
+              })
+            })
+          } else {
+            res.send(result)
+          }
         }
       })
     }

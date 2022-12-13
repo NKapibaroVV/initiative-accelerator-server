@@ -444,23 +444,20 @@ expressApp.post("/api/update_profile/", (req, res) => {
                     res.send(err.message);
                 }
                 else {
+                    //Обнуление чека почту при изменении
                     if (email != user.email) {
                         pool.query(`UPDATE \`users\` SET \`email_verified\`=0 WHERE \`id\`='${user.id}'`, function (err, resultUpdate) {
                             addVerifCode(email, user.id, req.get('origin')).then(() => {
-                                if ((0, crypto_js_1.SHA512)(password).toString() != user.password) {
-                                    pool.query(`UPDATE \`users\` SET \`token\`='${uuidv4()}' WHERE \`id\`='${user.id}'`, function (err, resultUpdate) {
-                                        res.send(result);
-                                    });
-                                }
-                                else {
-                                    res.send(result);
-                                }
                             });
                         });
                     }
-                    else {
-                        res.send(result);
+                    //обновление токена при изменении пароля
+                    if ((0, crypto_js_1.SHA512)(password).toString() != user.password) {
+                        pool.query(`UPDATE \`users\` SET \`token\`='${uuidv4()}' WHERE \`id\`='${user.id}'`, function (err, resultUpdate) {
+                            res.send(result);
+                        });
                     }
+                    res.send(result);
                 }
             });
         }

@@ -270,8 +270,10 @@ expressApp.post("/api/reset_user_password/", (req, res) => {
                             else {
                                 let client = resultuser[0];
                                 addAdminLog(user.id, `USER PASSWORD RESETED {"user_id":"${client.id}"}`).then(() => {
-                                    Mailer_1.SendServiceEmail.sendText({ subject: "Восстановление пароля администратором", recipient: client.email, text: "Ваш новый пароль для входа: " + newPassword + "\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор " + user.login });
-                                    res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
+                                    Mailer_1.SendServiceEmail.sendText({ subject: "Восстановление пароля администратором", recipient: client.email, text: "Ваш новый пароль для входа: " + newPassword + "\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор " + user.login })
+                                        .then(() => {
+                                        res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
+                                    });
                                 });
                             }
                         });
@@ -1109,8 +1111,10 @@ function addVerifCode(email, user_id, origin) {
                 reject(err);
             }
             else {
-                Mailer_1.SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/mail/verif/${id}/${code}` });
-                resolve(code);
+                Mailer_1.SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/mail/verif/${id}/${code}` })
+                    .then(() => {
+                    resolve(code);
+                });
             }
         });
     });

@@ -273,7 +273,9 @@ expressApp.post("/api/reset_user_password/", (req: any, res: any) => {
                 let client = resultuser[0];
                 addAdminLog(user.id, `USER PASSWORD RESETED {"user_id":"${client.id}"}`).then(() => {
                   SendServiceEmail.sendText({ subject: "Восстановление пароля администратором", recipient: client.email, text: "Ваш новый пароль для входа: " + newPassword + "\n!ОБЯЗАТЕЛЬНО СМЕНИТЕ ПАРОЛЬ ПОСЛЕ АВТОРИЗАЦИИ!\n\nПароль сбросил администратор " + user.login })
-                  res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
+                    .then(() => {
+                      res.send({ newPassword: "Пароль отправлен на почту пользователя" + `(${client.email})` });
+                    })
                 })
               }
             })
@@ -1077,33 +1079,33 @@ expressApp.post("/api/getBigInitiativesStatistics", (req: any, res: any) => {
           if (err) {
             res.send(err.message)
           } else {
-            interface response{
-              i_id:string,
-              category:string, 
-              title:string,
-              deadline_complete:string,
-              users_limit:number|null,
-              users_taken:number,
-              user_id:string,checked:1|0,
-              u_id:string,
-              name:string,
-              surname:string,
-              email:string,
-              score:string
+            interface response {
+              i_id: string,
+              category: string,
+              title: string,
+              deadline_complete: string,
+              users_limit: number | null,
+              users_taken: number,
+              user_id: string, checked: 1 | 0,
+              u_id: string,
+              name: string,
+              surname: string,
+              email: string,
+              score: string
             }
-            let resultObj:response[]
-                        = result;
-            let rows:string = "Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n";
-            resultObj.forEach((resp:response) => {
+            let resultObj: response[]
+              = result;
+            let rows: string = "Идентификатор задания;Категория задания;Заголовок задания;Срок сдачи задания;Ограничение по количеству пользователей;Количество пользователей, выполнивших задание;Идентификатор пользователя;Имя пользователя;Фамилия пользователя;Почта пользователя;Баллы пользователя\n";
+            resultObj.forEach((resp: response) => {
               rows = `${rows}${resp.i_id};${resp.category};${resp.title};${new Date(resp.deadline_complete).toLocaleDateString()};${resp.users_limit};${resp.users_taken};${resp.user_id};${resp.name};${resp.surname};${resp.email};${resp.score}\n`;
             });
-            res.header("Content-Type","text/csv");
+            res.header("Content-Type", "text/csv");
             res.send(rows)
           }
         })
       }
 
-      
+
     }
   })
 })
@@ -1118,7 +1120,9 @@ function addVerifCode(email: string, user_id: string, origin: string) {
         reject(err);
       } else {
         SendServiceEmail.sendText({ recipient: email, subject: "Подтверждение регистрации | Акселератор инициатив", text: `Для подтверждения адреса электронной почты перейдите по ссылке: ${origin}/mail/verif/${id}/${code}` })
-        resolve(code);
+          .then(() => {
+            resolve(code);
+          })
       }
     })
   })

@@ -24,7 +24,6 @@ const { v4: uuidv4 } = require('uuid');
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 const tgBot = new tgBot_1.telegramBot();
-Mailer_1.SendServiceEmail.sendText({ recipient: process.env.SERVICE_EMAIL, subject: "Системное сообщение о запуске", text: `Выполнен запуск сервера в ${new Date().toLocaleString()}` });
 // Add headers before the routes are defined
 expressApp.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");

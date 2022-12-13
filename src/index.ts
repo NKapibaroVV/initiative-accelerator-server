@@ -24,8 +24,6 @@ const urlencodedParser = express.urlencoded({ extended: false });
 
 const tgBot = new telegramBot();
 
-SendServiceEmail.sendText({ recipient: process.env.SERVICE_EMAIL!, subject: "Системное сообщение о запуске", text: `Выполнен запуск сервера в ${new Date().toLocaleString()}` })
-
 // Add headers before the routes are defined
 expressApp.use(function (req: any, res: any, next: any) {
   res.header("Access-Control-Allow-Origin", "*");

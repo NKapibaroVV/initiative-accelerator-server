@@ -440,10 +440,12 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
     } else {
       let user = result[0];
       let avatarURI: string | null = null;
+      
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(password)}` : ""}${!!avatarURI ? `, \`avatarURI\`=${mysql.escape(avatar)}` : ""} WHERE \`id\`='${user.id}'`
+
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(SHA512(password))}` : ""}${!!avatarURI ? `, \`avatarURI\`=${mysql.escape(avatar)}` : ""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)

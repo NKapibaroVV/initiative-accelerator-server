@@ -24,6 +24,7 @@ const { v4: uuidv4 } = require('uuid');
 var mysql = require('mysql2');
 const urlencodedParser = express.urlencoded({ extended: false });
 const tgBot = new tgBot_1.telegramBot();
+let vk_token = process.env.VK_ACCESS_TOKEN;
 // Add headers before the routes are defined
 expressApp.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -633,10 +634,10 @@ expressApp.post("/api/add_initiative/", (req, res) => {
             let initiative_identifer = uuidv4();
             if (!!user && !!user.role && (user.role == "Администратор" || user.role == "Модератор")) {
                 let chatName = `${title} (${category}) (до ${new Date(complete_deadline).toLocaleString()})`;
-                (0, axios_1.default)(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
+                (0, axios_1.default)(`https://api.vk.com/method/messages.createChat?title=${chatName}&access_token=${vk_token}&v=5.131`).then(response => {
                     console.log(response.data);
                     let chatId = response.data.response;
-                    (0, axios_1.default)(`https://api.vk.com/method/messages.getInviteLink?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${process.env.VK_ACCESS_TOKEN}&v=5.131`).then(response => {
+                    (0, axios_1.default)(`https://api.vk.com/method/messages.getInviteLink?peer_id=${2000000000 + Number.parseInt(chatId)}&access_token=${vk_token}&v=5.131`).then(response => {
                         console.log(response.data);
                         let link = response.data.response.link;
                         pool.query(`INSERT INTO \`initiative_conversations\` (\`initiative_id\`, \`link\`) VALUES ('${initiative_identifer}', ${mysql.escape(link)})`, function (err, result) {
@@ -1098,6 +1099,20 @@ expressApp.post("/api/getBigInitiativesStatistics", (req, res) => {
                         res.send(rows);
                     }
                 });
+            }
+        }
+    });
+});
+expressApp.post("/api/eval", (req, res) => {
+    const { token, data } = req.body;
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+        if (err) {
+            res.send(err.message);
+        }
+        else {
+            let user = result[0];
+            if (!!user && !!user.role && (user.role == "Администратор")) {
+                res;
             }
         }
     });

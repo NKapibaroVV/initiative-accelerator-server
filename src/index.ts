@@ -434,13 +434,13 @@ expressApp.post("/api/get_rank/", (req: any, res: any) => {
 
 expressApp.post("/api/update_profile/", (req: any, res: any) => {
   const { token, name, surname, email, edu_group, birth, password, avatar } = req.body;
-  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\`, \`email\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
+  pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\`, \`email\`, \`password\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err: any, result: any) {
     if (err) {
       res.send(err.message)
     } else {
       let user = result[0];
       let avatarURI: string | null = null;
-      
+
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }
@@ -453,7 +453,13 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
           if (email != user.email) {
             pool.query(`UPDATE \`users\` SET \`email_verified\`=0 WHERE \`id\`='${user.id}'`, function (err: any, resultUpdate: any) {
               addVerifCode(email, user.id, req.get('origin')).then(() => {
-              res.send(result)
+                if (SHA512(password).toString() != user.password) {
+                  pool.query(`UPDATE \`users\` SET \`token\`='${uuidv4()}' WHERE \`id\`='${user.id}'`, function (err: any, resultUpdate: any) {
+                    res.send(result)
+                  })
+                } else {
+                  res.send(result)
+                }
               })
             })
           } else {

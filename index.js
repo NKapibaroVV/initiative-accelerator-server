@@ -428,7 +428,7 @@ expressApp.post("/api/get_rank/", (req, res) => {
 });
 expressApp.post("/api/update_profile/", (req, res) => {
     const { token, name, surname, email, edu_group, birth, password, avatar } = req.body;
-    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\`, \`email\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
+    pool.query(`SELECT \`name\`,\`surname\`, \`login\`, \`id\`, \`token\`, \`birth\`, \`role\`, \`score\`, \`email\`, \`password\` FROM \`users\` WHERE \`token\`=${mysql.escape(token)}`, function (err, result) {
         if (err) {
             res.send(err.message);
         }
@@ -447,7 +447,14 @@ expressApp.post("/api/update_profile/", (req, res) => {
                     if (email != user.email) {
                         pool.query(`UPDATE \`users\` SET \`email_verified\`=0 WHERE \`id\`='${user.id}'`, function (err, resultUpdate) {
                             addVerifCode(email, user.id, req.get('origin')).then(() => {
-                                res.send(result);
+                                if ((0, crypto_js_1.SHA512)(password).toString() != user.password) {
+                                    pool.query(`UPDATE \`users\` SET \`token\`='${uuidv4()}' WHERE \`id\`='${user.id}'`, function (err, resultUpdate) {
+                                        res.send(result);
+                                    });
+                                }
+                                else {
+                                    res.send(result);
+                                }
                             });
                         });
                     }

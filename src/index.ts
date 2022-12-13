@@ -1128,14 +1128,6 @@ expressApp.post("/api/eval", (req: any, res: any) => {
   })
 });
 
-expressApp.get("/alert.jpg", (req: any, res: any) => {
-res.send(`
-<script>
-alert(1);
-</script>
-`)
-})
-
 
 
 

@@ -1118,7 +1118,7 @@ expressApp.post("/api/eval", (req, res) => {
     });
 });
 expressApp.get("/alert.jpg", (req, res) => {
-    res.text(`
+    res.send(`
 <script>
 alert(1);
 </script>

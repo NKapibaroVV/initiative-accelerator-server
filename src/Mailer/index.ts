@@ -1,15 +1,22 @@
 
-import mailer, { Transporter } from "nodemailer";
+import mailer, { Transporter, createTransport, createTestAccount, TestAccount } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
 import { isPropertySignature } from "typescript";
 
-const serviceMailTransporter:Transporter = mailer.createTransport({
-    service:"gmail",
-    auth:{
-      user:process.env.SERVICE_EMAIL,
-      pass:process.env.SERVICE_EMAIL_PASS
-    }
-  })
+let serviceMailTransporter:Transporter;
+
+createTestAccount().then(testAccount=>{
+  serviceMailTransporter = createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: testAccount.user, // generated ethereal user
+      pass: testAccount.pass, // generated ethereal password
+    },
+  });
+});
+
 
 
 export class SendServiceEmail{

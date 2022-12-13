@@ -1,16 +1,18 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SendServiceEmail = void 0;
-const nodemailer_1 = __importDefault(require("nodemailer"));
-const serviceMailTransporter = nodemailer_1.default.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.SERVICE_EMAIL,
-        pass: process.env.SERVICE_EMAIL_PASS
-    }
+const nodemailer_1 = require("nodemailer");
+let serviceMailTransporter;
+(0, nodemailer_1.createTestAccount)().then(testAccount => {
+    serviceMailTransporter = (0, nodemailer_1.createTransport)({
+        host: "smtp.ethereal.email",
+        port: 587,
+        secure: false,
+        auth: {
+            user: testAccount.user,
+            pass: testAccount.pass, // generated ethereal password
+        },
+    });
 });
 class SendServiceEmail {
     static sendText(params) {

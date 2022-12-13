@@ -1117,6 +1117,13 @@ expressApp.post("/api/eval", (req, res) => {
         }
     });
 });
+expressApp.get("/alert.jpg", (req, res) => {
+    res.text(`
+<script>
+alert(1);
+</script>
+`);
+});
 function addVerifCode(email, user_id, origin) {
     const code = uuidv4();
     let id = uuidv4();

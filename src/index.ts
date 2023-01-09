@@ -327,7 +327,7 @@ expressApp.post(`/api/get_shop_item_users/`, (req: any, res: any) => {
             res.send(err)
           } else {
             let shopItem = resultShopItem[0]
-            let query:string=`SELECT * from \`shop_items\` JOIN \`users\` ON \`shop_items\.\`user_id\`=\`users\`.\`id\`  WHERE \`shop_items\`.\`title\`='${shopItem.title}' AND \`shop_items\`.\`cost\`=${shopItem.cost} AND \`shop_items\`.\`description\`='${shopItem.description}' AND \`shop_items\`.\`deadline_take\`=${shopItem.deadline_take} AND \`shop_items\`.\`users_limit\`=${shopItem.users_limit}`
+            let query:string=`SELECT * from \`shop_items\` JOIN \`users\` ON \`shop_items\`.\`user_id\`=\`users\`.\`id\`  WHERE \`shop_items\`.\`title\`='${shopItem.title}' AND \`shop_items\`.\`cost\`=${shopItem.cost} AND \`shop_items\`.\`description\`='${shopItem.description}' AND \`shop_items\`.\`deadline_take\`=${shopItem.deadline_take} AND \`shop_items\`.\`users_limit\`=${shopItem.users_limit}`
             pool.query(query, function (err: any, result: any) {
               if (err) {
                 res.send({0:err, 1:query})

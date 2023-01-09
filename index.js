@@ -337,7 +337,7 @@ expressApp.post(`/api/get_shop_item_users/`, (req, res) => {
                             });
                         }
                         else {
-                            res.send("Никому не назначено");
+                            res.send("Доступно всем");
                         }
                     }
                 });

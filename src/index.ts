@@ -336,7 +336,7 @@ expressApp.post(`/api/get_shop_item_users/`, (req: any, res: any) => {
                 if (err) {
                   res.send({ 0: err, 1: query })
                 } else {
-                  res.send(result)
+                  res.send({0:result, 1:shopItem, 2:resultShopItem})
                 }
               })
             }

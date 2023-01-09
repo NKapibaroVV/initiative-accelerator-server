@@ -324,9 +324,9 @@ expressApp.post(`/api/get_shop_item_users/`, (req, res) => {
                         res.send(err);
                     }
                     else {
-                        let shopItem = resultShopItem[0];
-                        if (!Array.isArray(resultShopItem)) {
-                            shopItem = resultShopItem;
+                        let shopItem = resultShopItem;
+                        if (Array.isArray(resultShopItem)) {
+                            shopItem = resultShopItem[0];
                         }
                         if (shopItem.user_id != null) {
                             let query = `SELECT * from \`shop_items\` JOIN \`users\` ON \`shop_items\`.\`user_id\`=\`users\`.\`id\`  WHERE \`shop_items\`.\`title\`='${shopItem.title}' AND \`shop_items\`.\`cost\`=${shopItem.cost} AND \`shop_items\`.\`description\`='${shopItem.description}' AND \`shop_items\`.\`deadline_take\`=${shopItem.deadline_take} AND \`shop_items\`.\`users_limit\`=${shopItem.users_limit}`;

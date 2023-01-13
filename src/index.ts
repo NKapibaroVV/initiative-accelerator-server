@@ -326,12 +326,12 @@ expressApp.post(`/api/get_shop_item_users/`, (req: any, res: any) => {
           if (err) {
             res.send(err)
           } else {
-            let shopItem=resultShopItem;
+            let shopItem = resultShopItem;
             if (Array.isArray(resultShopItem)) {
-              shopItem=resultShopItem[0]
+              shopItem = resultShopItem[0]
             }
             if (shopItem.user_id != null) {
-              let query: string = `SELECT * from \`shop_items\` JOIN \`users\` ON \`shop_items\`.\`user_id\`=\`users\`.\`id\`  WHERE \`shop_items\`.\`title\`${shopItem.title!=null?`='${shopItem.title}'`:"IS NULL"} AND \`shop_items\`.\`cost\`${shopItem.cost!=null?`='${shopItem.cost}'`:"IS NULL"} AND \`shop_items\`.\`description\`${shopItem.description!=null?`='${shopItem.description}'`:"IS NULL"} AND \`shop_items\`.\`deadline_take\`${shopItem.deadline_take!=null?`='${shopItem.deadline_take}'`:"IS NULL"} AND \`shop_items\`.\`users_limit\`${shopItem.users_limit!=null?`='${shopItem.users_limit}'`:"IS NULL"}`
+              let query: string = `SELECT * from \`shop_items\` JOIN \`users\` ON \`shop_items\`.\`user_id\`=\`users\`.\`id\`  WHERE \`shop_items\`.\`title\`${shopItem.title != null ? `='${shopItem.title}'` : "IS NULL"} AND \`shop_items\`.\`cost\`${shopItem.cost != null ? `='${shopItem.cost}'` : "IS NULL"} AND \`shop_items\`.\`description\`${shopItem.description != null ? `='${shopItem.description}'` : "IS NULL"} AND \`shop_items\`.\`deadline_take\`${shopItem.deadline_take != null ? `='${shopItem.deadline_take}'` : "IS NULL"} AND \`shop_items\`.\`users_limit\`${shopItem.users_limit != null ? `='${shopItem.users_limit}'` : "IS NULL"}`
               pool.query(query, function (err: any, result: any) {
                 if (err) {
                   res.send({ 0: err, 1: query })
@@ -478,13 +478,13 @@ expressApp.post("/api/update_profile/", (req: any, res: any) => {
       res.send(err.message)
     } else {
       let user = result[0];
-      let avatarURI: string = "";
+      let avatarURI: string = user.avatar;
 
       if (/http.?:\/\/.*\.(jpg|png)/g.test(avatar)) {
         avatarURI = avatar;
       }
 
-      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}${!!password ? `, \`password\`=${mysql.escape(SHA512(password).toString())}` : ""}${`\`avatarURI\`=${mysql.escape(`${avatarURI} `)}`} WHERE \`id\`='${user.id}'`
+      let sql = `UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`avatarURI\`=${mysql.escape(`${avatarURI}`)}${!!password ? `, \`password\`=${mysql.escape(SHA512(password).toString())}` : ""} WHERE \`id\`='${user.id}'`
       pool.query(sql, function (err: any, result: any) {
         if (err) {
           res.send(err.message)

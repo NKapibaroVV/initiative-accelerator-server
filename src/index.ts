@@ -240,13 +240,25 @@ expressApp.post("/api/update_user/", (req: any, res: any) => {
       let user = result[0];
 
       if (!!user && !!user.role && user.role == "Администратор") {
-        pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`role\`=${mysql.escape(role)} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
-          if (err) {
-            res.send(err.message)
-          } else {
-            res.send(result)
-          }
-        })
+        if (name?.length > 0
+          &&
+          surname?.length > 0
+          &&
+          email?.length > 0
+          &&
+          edu_group?.length > 0
+          &&
+          birth?.length > 0
+        ) {
+          pool.query(`UPDATE \`users\` SET \`name\`=${mysql.escape(name)}, \`surname\`=${mysql.escape(surname)}, \`email\`=${mysql.escape(email)}, \`edu_group\`=${mysql.escape(edu_group)}, \`birth\`=${mysql.escape(birth)}, \`role\`=${mysql.escape(role)} WHERE \`id\`='${user_id}'`, function (err: any, result: any) {
+            if (err) {
+              res.send(err.message)
+            } else {
+              res.send(result)
+            }
+          })
+        }
+
       } else {
         res.send()
       }

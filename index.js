@@ -26,11 +26,12 @@ const urlencodedParser = express.urlencoded({ extended: false });
 const tgBot = new tgBot_1.telegramBot();
 let vk_token = process.env.VK_ACCESS_TOKEN;
 // Add headers before the routes are defined
-expressApp.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+// expressApp.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+expressApp.use(cors());
 const pool = mysql.createPool({
     connectionLimit: 15,
     host: process.env.DB_HOST,

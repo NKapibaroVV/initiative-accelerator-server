@@ -33,10 +33,10 @@ expressApp.use(function (req, res, next) {
 });
 const pool = mysql.createPool({
     connectionLimit: 15,
-    host: 'f0711974.xsph.ru',
-    user: 'f0711974_initiative_accelerator',
+    host: 'pma.sprinthost.ru',
+    user: 'a0870284',
     password: process.env.DB_PASSWORD,
-    database: 'f0711974_initiative_accelerator',
+    database: 'a0870284_siteDB-538',
     multipleStatements: true
 });
 console.log(pool);

@@ -31,7 +31,13 @@ let vk_token = process.env.VK_ACCESS_TOKEN;
 //     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 //     next();
 // });
-expressApp.use(cors());
+const corsOptions = {
+    origin: '*',
+    credentials: true,
+    optionSuccessStatus: 200,
+}
+expressApp.use(cors(corsOptions))
+
 const pool = mysql.createPool({
     connectionLimit: 15,
     host: process.env.DB_HOST,

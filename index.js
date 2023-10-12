@@ -35,8 +35,8 @@ const corsOptions = {
     origin: '*',
     credentials: true,
     optionSuccessStatus: 200,
-}
-expressApp.use(cors(corsOptions))
+};
+expressApp.use(cors(corsOptions));
 
 const pool = mysql.createPool({
     connectionLimit: 15,
